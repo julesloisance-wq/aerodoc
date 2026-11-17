@@ -1,5 +1,5 @@
 db:
-	docker compose up -d --wait db
+	docker compose up -d --wait db adminer
 	uv run aerodoc health
 
 db-down:
@@ -13,4 +13,7 @@ lint:
 	uv run ruff check . --fix
 	uv run ruff format .
 
-.PHONY: db db-down test lint
+data:
+	uv run aerodoc data
+
+.PHONY: db db-down data test lint

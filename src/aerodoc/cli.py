@@ -1,5 +1,7 @@
 """Command-line interface: `aerodoc <command>`."""
 
+from pathlib import Path
+
 import typer
 
 from aerodoc import db
@@ -13,6 +15,23 @@ def health() -> None:
     with db.connect() as conn:
         info = db.server_info(conn)
     typer.echo(f"PostgreSQL {info['postgres']} with pgvector {info['pgvector']}: OK")
+
+
+@app.command()
+def data(
+    config: Path = typer.Option(Path("configs/corpus.yaml"), help="Corpus definition."),
+    data_dir: Path = typer.Option(Path("data"), help="Where to store the corpus."),
+) -> None:
+    """Download the corpus (FAA directives and handbook) and write the manifest."""
+    from aerodoc.corpus import build_corpus
+
+    records = build_corpus(config, data_dir)
+    try:
+        with db.connect() as conn:
+            n = db.upsert_documents(conn, records)
+        typer.echo(f"Loaded {n} documents into the database (table `documents`).")
+    except Exception as exc:  # the corpus on disk is still valid without the database
+        typer.echo(f"Database not reachable, skipped loading ({exc}). Run `make db` first.")
 
 
 @app.command()

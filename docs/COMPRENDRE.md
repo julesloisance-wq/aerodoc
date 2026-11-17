@@ -73,3 +73,49 @@ Une base classique sait répondre à « trouve les lignes où `avion = 'A320'` �
 - `make db` : démarre la base et vérifie qu'elle répond ;
 - `make test` : vérifie le style du code et lance les tests ;
 - `uv run aerodoc health` : affiche les versions de PostgreSQL et de pgvector.
+
+---
+
+## Étape 2 — Le corpus
+
+### Ce qui a été construit
+`make data` télécharge tous les documents et produit :
+- `data/raw/directives/` : **225 consignes de navigabilité (AD)** publiées entre janvier 2022 et novembre 2026, en texte brut ;
+- `data/raw/handbooks/FAA-H-8083-30B.pdf` : le **manuel de maintenance de la FAA** (677 pages) ;
+- `data/manifest.jsonl` : la **liste de tous les documents**, une ligne par document (titre, numéro d'AD, avions concernés, dates, adresse source, empreinte SHA-256 qui prouve que le fichier n'a pas changé) ;
+- la table `documents` dans la base, visible dans Adminer.
+
+Répartition : A320 (et A318/A319/A321) 70, A350 72, B737 61, ATR 72 24. Deux consignes concernent deux familles à la fois.
+
+### Le corpus, c'est quoi ?
+L'ensemble des documents dans lesquels l'assistant a le droit de chercher. **Un RAG ne vaut que par son corpus** : si l'information n'y est pas, il ne peut pas la trouver (et doit dire « je ne sais pas »).
+
+Notre corpus mélange deux types de documents, ce qui rend le problème réaliste :
+| | Consignes (AD) | Manuel |
+|---|---|---|
+| Taille | courtes (1 à 15 pages) | longue (677 pages) |
+| Style | juridique, très structuré, plein d'identifiants | pédagogique, avec figures |
+| Questions typiques | « Quelle AD concerne le train d'atterrissage de l'A320 ? » | « Comment inspecter une soudure ? » |
+
+### À quoi ressemble une consigne de navigabilité
+Exemple réel : **AD 2026-18-03** (document `2026-18052`, publié le 3 septembre 2026). Chaque AD a la même structure :
+- **(a) Effective Date** : date d'entrée en vigueur (18 septembre 2026) ;
+- **(c) Applicability** : quels avions exactement (ici A318-112, A319-115…, A320-214…, A321-211…) ;
+- **(d) Subject** : le système concerné, avec un code ATA (classification standard des systèmes d'avion ; 57 = ailes) ;
+- **(e) Unsafe Condition** : le danger. Ici, des marques d'outil sur les supports du train principal, qui pourraient provoquer une fissure de fatigue puis l'effondrement du train ;
+- **(f) Compliance / (g) Requirements** : ce qu'il faut faire et dans quel délai.
+
+Particularité : pour les avions européens (Airbus, ATR), la FAA reprend souvent une consigne de l'**EASA** (l'agence européenne de la sécurité aérienne) et écrit simplement « appliquez l'EASA AD 2026-0142 ». Le détail des actions n'est alors **pas dans notre corpus** : c'est une limite à connaître (l'assistant devra dire qu'il ne sait pas).
+
+Le texte contient aussi des repères de page du Federal Register, comme `[[Page 56578]]`. On s'en servira pour **citer la page exacte**.
+
+### Choix et raisons
+- **API du Federal Register pour chercher, govinfo.gov pour le texte** : l'API donne les métadonnées propres (dates, numéro d'AD) ; le texte brut du Federal Register est protégé contre les robots, alors que govinfo.gov (l'imprimerie officielle du gouvernement américain) sert le même document en texte simple.
+- **Texte plutôt que PDF pour les AD** : le PDF du Federal Register est sur 3 colonnes, difficile à lire proprement ; la version texte est propre et garde les numéros de page.
+- **Filtre sur le résumé** : une AD n'est gardée que si son résumé mentionne bien le modèle (par exemple « A350 »), pour éviter les documents hors sujet.
+- **Depuis 2022, 70 au maximum par famille** : assez pour être réaliste, assez peu pour indexer en quelques minutes.
+- **`make data` est relançable** : les fichiers déjà présents ne sont pas retéléchargés.
+- **Aucun document dans Git** : ils sont publics et se retéléchargent ; on versionne la recette (`configs/corpus.yaml`), pas les données.
+
+### Voir la base de données (Adminer)
+Adminer est une page web qui affiche la base comme un tableur : http://localhost:8080. Connexion : système **PostgreSQL**, serveur **db**, utilisateur / mot de passe / base **aerodoc**. Ouvrir la table `documents`, puis « Afficher les données ».

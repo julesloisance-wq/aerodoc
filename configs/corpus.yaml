@@ -1,0 +1,25 @@
+# Corpus definition, used by `make data`.
+# Airworthiness directives (ADs) come from the Federal Register API; full text from govinfo.gov.
+directives:
+  published_since: "2022-01-01"
+  max_per_family: 70
+  families:
+    A320:
+      query: '"Airbus SAS" A320'
+      # An AD is kept only if its abstract mentions one of these model names.
+      models: ["A318", "A319", "A320", "A321"]
+    A350:
+      query: '"Airbus SAS" A350'
+      models: ["A350"]
+    B737:
+      query: '"The Boeing Company" 737'
+      models: ["737"]
+    ATR72:
+      query: '"ATR-GIE" ATR72'
+      models: ["ATR72", "ATR 72"]
+
+handbooks:
+  - id: FAA-H-8083-30B
+    title: "Aviation Maintenance Technician Handbook - General (FAA-H-8083-30B)"
+    url: "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/amtg_handbook.pdf"
+    page_url: "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation"
