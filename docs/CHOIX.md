@@ -30,6 +30,19 @@ Les termes techniques sont expliqués dans le glossaire de `docs/COMPRENDRE.md`.
 
 **En entretien.** « Dans un domaine réglementé comme la maintenance aéronautique, une réponse doit être traçable. Le RAG permet de citer la source exacte, de mettre à jour la base sans ré-entraîner de modèle, et de s'abstenir quand l'information manque. »
 
+### Et le fine-tuning ?
+**Ce que c'est.** Poursuivre l'entraînement d'un modèle sur ses propres exemples (par exemple des milliers de paires question/réponse de maintenance), pour modifier le modèle lui-même. Analogie : le RAG donne au technicien le classeur de documentation pendant l'examen ; le fine-tuning lui fait apprendre la matière par cœur.
+
+**Pourquoi on n'en fait pas.**
+- Les consignes changent chaque semaine : il faudrait ré-entraîner à chaque nouvelle publication, alors qu'avec le RAG on ajoute le document à l'index en quelques secondes.
+- Un modèle fine-tuné répond de mémoire : il ne peut pas citer de source, et ses erreurs sont invérifiables.
+- Le fine-tuning apprend surtout un **style ou un format**, pas des faits fiables.
+- Il faut des milliers d'exemples de qualité et de la puissance de calcul.
+
+**Où il aurait du sens.** Pour adapter le **modèle d'embedding ou le reranker** au vocabulaire aéronautique : notre reranker a été entraîné sur des questions web génériques, et l'analyse des erreurs montre qu'il ignore les numéros de consigne (voir 6.5). C'est une piste d'amélioration crédible.
+
+**En entretien.** « Je n'ai pas fait de fine-tuning, parce que le besoin était d'accéder à des documents qui changent souvent et de citer la source exacte. Le fine-tuning modifie le modèle lui-même : il faut le ré-entraîner à chaque nouvelle consigne, et il ne peut pas citer. Par contre, ajuster le reranker sur des données aéronautiques serait une bonne piste pour améliorer la recherche. »
+
 ---
 
 ## 1. Infrastructure
@@ -248,7 +261,20 @@ Le **MRR** (*Mean Reciprocal Rank*) vaut 1 si la bonne réponse est toujours 1ʳ
 
 **En entretien.** « La recherche vectorielle ratait les numéros de consigne. J'ai ajouté BM25, fusionné les deux classements avec la RRF, puis un cross-encoder pour réordonner les 20 meilleurs candidats. Sur mon jeu de test, le MRR passe de 0,78 à 0,94, pour environ une seconde de latence. Un reranker plus gros gagnait encore 3 points mais coûtait 5 fois plus de temps : j'ai privilégié l'interactivité. »
 
-### 6.5 Les paramètres de la recherche
+### 6.5 Le filtre par numéro de consigne (métadonnées)
+**Le problème, trouvé par l'analyse des erreurs sur dev.** Question : « What is the minimum revision date for the maintenance task required by AD 2026-09-14? » BM25 classait bien les passages de l'AD 2026-09-14 aux places 1 à 5, mais ils disparaissaient : la fusion RRF favorise les passages trouvés par les deux méthodes, puis le reranker, entraîné sur des questions web génériques, préférait d'autres consignes au vocabulaire proche (« revision of the maintenance program ») et **ignorait le numéro exact**.
+
+**Les options testées.**
+1. Changer la façon de choisir les candidats du reranker (alterner les meilleurs de chaque méthode) : les bons passages arrivaient au reranker, mais il les classait toujours derrière. Abandonné.
+2. **Un filtre sur les métadonnées** : si la question cite un numéro d'AD présent dans la base, les passages de cette AD sont toujours relus par le reranker, et 3 d'entre eux sont gardés parmi les 5 envoyés au LLM.
+
+**Le choix et pourquoi : le filtre (option 2).** Un numéro de consigne est une information **structurée** et sans ambiguïté : il est plus fiable de l'exploiter directement que d'espérer qu'un modèle généraliste y fasse attention. On garde 2 places pour d'autres consignes, pour qu'une question comme « l'AD 2025-13-12 a-t-elle été remplacée ? » trouve encore la consigne qui la remplace (vérifié : AD 2025-25-12 reste en 1ʳᵉ position).
+
+**Mesuré sur dev.** Questions par numéro : 7/8 → 8/8 ; abstentions à tort : 2/35 → 1/35 ; aucune autre catégorie ne baisse.
+
+**En entretien.** « L'analyse des erreurs m'a montré que le reranker ignorait les identifiants exacts. Plutôt que de compter sur un modèle généraliste, j'exploite le numéro de consigne comme une métadonnée : si la question en cite un, ses passages sont garantis dans le contexte. C'est un bon exemple de combinaison entre recherche sémantique et données structurées. »
+
+### 6.6 Les paramètres de la recherche
 - **30 candidats par méthode** : assez pour que la fusion ait du choix, sans coût notable.
 - **20 candidats relus par le reranker** : son coût augmente avec ce nombre. 20 couvre largement les cas où la bonne réponse était en 2ᵉ à 4ᵉ position.
 - **5 passages envoyés au LLM** : environ 1 250 mots. Assez pour couvrir une réponse qui demande plusieurs passages, assez peu pour ne pas noyer le LLM.
