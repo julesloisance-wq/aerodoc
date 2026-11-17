@@ -1,0 +1,960 @@
+{
+  "date": "2026-11-17T18:19:28",
+  "questions_file": "eval/questions/dev.jsonl",
+  "system": "rag",
+  "config": "configs/default.yaml",
+  "config_values": {
+    "embedding": {
+      "model": "BAAI/bge-small-en-v1.5",
+      "dimension": 384,
+      "query_prefix": "Represent this sentence for searching relevant passages: ",
+      "batch_size": 32
+    },
+    "chunking": {
+      "max_words": 250,
+      "overlap_words": 40,
+      "min_words": 80,
+      "skip_sections": [
+        "Agency",
+        "Action",
+        "Addresses",
+        "For Further Information Contact",
+        "Comments Invited",
+        "Confidential Business Information",
+        "Regulatory Flexibility Act",
+        "Paperwork Reduction Act",
+        "Authority for This Rulemaking",
+        "Regulatory Findings",
+        "List of Subjects in 14 CFR Part 39"
+      ]
+    },
+    "retrieval": {
+      "top_k": 5,
+      "mode": "hybrid",
+      "candidates": 30,
+      "rrf_k": 60,
+      "rerank": true,
+      "rerank_top_n": 20,
+      "reranker_model": "cross-encoder/ms-marco-MiniLM-L6-v2"
+    },
+    "llm": {
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash"
+      ],
+      "temperature": 0.0,
+      "max_tokens": 1024,
+      "timeout_s": 60.0,
+      "retries": 2
+    }
+  },
+  "summary": {
+    "questions": 45,
+    "retrieval_hit@5": {
+      "k": 29,
+      "n": 35,
+      "rate": 0.8285714285714286,
+      "ci95": [
+        0.673,
+        0.919
+      ]
+    },
+    "answer_correct": {
+      "k": 30,
+      "n": 35,
+      "rate": 0.8571428571428571,
+      "ci95": [
+        0.706,
+        0.937
+      ]
+    },
+    "false_abstention": {
+      "k": 2,
+      "n": 35,
+      "rate": 0.05714285714285714,
+      "ci95": [
+        0.016,
+        0.186
+      ]
+    },
+    "correct_abstention": {
+      "k": 10,
+      "n": 10,
+      "rate": 1.0,
+      "ci95": [
+        0.722,
+        1.0
+      ]
+    },
+    "hallucination_on_unanswerable": {
+      "k": 0,
+      "n": 10,
+      "rate": 0.0,
+      "ci95": [
+        0.0,
+        0.278
+      ]
+    },
+    "citation_precision": 0.7676767676767676,
+    "median_latency_s": 2.21,
+    "max_latency_s": 41.69,
+    "mean_tokens": 1970.6888888888889,
+    "answer_correct_by_type": {
+      "ad_number": {
+        "k": 7,
+        "n": 8,
+        "rate": 0.875,
+        "ci95": [
+          0.529,
+          0.978
+        ]
+      },
+      "ad_topic": {
+        "k": 6,
+        "n": 7,
+        "rate": 0.8571428571428571,
+        "ci95": [
+          0.487,
+          0.974
+        ]
+      },
+      "french": {
+        "k": 2,
+        "n": 2,
+        "rate": 1.0,
+        "ci95": [
+          0.342,
+          1.0
+        ]
+      },
+      "handbook": {
+        "k": 12,
+        "n": 14,
+        "rate": 0.8571428571428571,
+        "ci95": [
+          0.601,
+          0.96
+        ]
+      },
+      "multi_doc": {
+        "k": 1,
+        "n": 2,
+        "rate": 0.5,
+        "ci95": [
+          0.095,
+          0.905
+        ]
+      },
+      "near_miss": {
+        "k": 1,
+        "n": 1,
+        "rate": 1.0,
+        "ci95": [
+          0.207,
+          1.0
+        ]
+      },
+      "superseded": {
+        "k": 1,
+        "n": 1,
+        "rate": 1.0,
+        "ci95": [
+          0.207,
+          1.0
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "g22",
+      "type": "ad_number",
+      "question": "What is the minimum revision date for the maintenance task required by AD 2026-09-14 to ensure compliance?",
+      "answer": "The provided passages do not contain information regarding AD 2026-09-14.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.69,
+      "tokens": 2178,
+      "cited": [],
+      "retrieved": false,
+      "correct": false,
+      "missing_facts": [
+        "October 2024"
+      ],
+      "citation_precision": null,
+      "false_abstention": true
+    },
+    {
+      "id": "g20",
+      "type": "ad_number",
+      "question": "What specific hazard is AD 2022-13-18 intended to mitigate regarding the passenger oxygen setup?",
+      "answer": "AD 2022-13-18 is intended to address the potential for electrical current to pass through low pressure (LP) oxygen flex-hoses in the gaseous passenger oxygen system [1][4]. This condition could cause the flex-hoses to melt or burn, resulting in an oxygen-fed fire in the passenger cabin [1][2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.14,
+      "tokens": 1745,
+      "cited": [
+        "AD 2022-13-18, (d) Subject / (e) Unsafe Condition / (f) Compliance, FR page 49516",
+        "AD 2022-13-18, 14 CFR Part 39 / Summary, FR page 49515",
+        "AD 2022-13-18, Background / Comments, FR page 49515"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g10",
+      "type": "ad_number",
+      "question": "What specific structural failure is AD 2022-25-15 intended to prevent in the affected Boeing 737 fleet?",
+      "answer": "AD 2022-25-15 is intended to address cracking in the rear spar lower chord at a fastener common to the main landing gear (MLG) aft support fitting [3][4]. If not addressed, this condition could result in the inability of the rear spar lower chord to sustain limit loads, leading to reduced structural integrity and possible loss of control of the airplane [3][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.47,
+      "tokens": 1951,
+      "cited": [
+        "AD 2022-25-15, (d) Subject / (e) Unsafe Condition, FR page 78532",
+        "AD 2022-25-15, Dates / Background, FR page 78530"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g24",
+      "type": "ad_number",
+      "question": "What specific technical concern regarding 5G signals triggered the issuance of AD 2021-23-12?",
+      "answer": "AD 2021-23-12 was issued because radio altimeters cannot be relied upon to perform their intended function if they experience interference from wireless broadband operations in the 5G Lower C-Band, which is close to the frequency bands used by radio altimeters (4.2-4.4 GHz) [4]. Additionally, radio altimeter anomalies that are undetected by the automation or pilot, particularly close to the ground (e.g., landing flare), could lead to loss of continued safe flight and landing [1][2][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 41.69,
+      "tokens": 2564,
+      "cited": [
+        "AD 2026-13-17, Dates / Background, FR page 39405",
+        "AD 2022-03-20, Background, FR page 4787",
+        "AD 2022-05-04, Background, FR page 10300"
+      ],
+      "retrieved": false,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g42",
+      "type": "ad_number",
+      "question": "What specific hazard does AD 2024-23-03 aim to prevent regarding the autothrottle system?",
+      "answer": "AD 2024-23-03 aims to prevent a failure of the spoiler deflection to engage the cruise thrust split monitor (MONFD) used by the autothrottle (A/T) system [3][4]. If not addressed, this condition could lead to significant throttle split, resulting in asymmetric thrust and a subsequent lack of autothrottle disengagement, which could cause an uncommanded roll, loss of control of the airplane, and a reduced ability of the flightcrew to maintain safe flight and landing [3][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 8.57,
+      "tokens": 1941,
+      "cited": [
+        "AD 2024-23-03, (a) Effective Date / (b) Affected ADs / (c) Applicability / (d) Subject / (e) Unsafe Condition, FR page 95087",
+        "AD 2024-23-03, Dates / Background, FR page 95086"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g17",
+      "type": "ad_number",
+      "question": "What specific safety hazard does AD 2023-23-08 aim to prevent regarding the 10VU rack?",
+      "answer": "AD 2023-23-08 aims to prevent reading difficulties of flight-critical information displayed to the flightcrew during critical phases of flight, such as takeoff or approach [1][2]. This condition is caused by high vibration levels on the primary flight and navigation displays resulting from cracked or broken 10VU rack side fittings [2]. If not addressed, these reading difficulties could result in loss of airplane control at an altitude insufficient for recovery [1][2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 10.48,
+      "tokens": 1436,
+      "cited": [
+        "AD 2023-23-08, (d) Subject / (e) Unsafe Condition, FR page 83815",
+        "AD 2023-23-08, Background, FR page 83813"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g41",
+      "type": "ad_number",
+      "question": "Which specific variants of the B737 fleet are subject to the requirements mandated by AD 2026-13-17?",
+      "answer": "AD 2026-13-17 applies to all The Boeing Company Model 737-8, 737-9, and 737-8200 airplanes [5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.37,
+      "tokens": 1595,
+      "cited": [
+        "AD 2026-13-17, 14 CFR Part 39 / Summary, FR page 39405"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g23",
+      "type": "ad_number",
+      "question": "What specific maintenance actions are mandated by AD 2026-05-12 to resolve the identification issues with the main landing gear hardware?",
+      "answer": "AD 2026-05-12 mandates performing a check to identify the part number and serial number of the affected parts [4]. Additionally, the AD requires inspecting the affected main landing gear (MLG) trunnion block attachment retaining pin and fuse pins, recording the combination of work order number and original serial number as the new serial number, and updating the maintenance records, as applicable [4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.06,
+      "tokens": 1312,
+      "cited": [
+        "AD 2026-05-12, 14 CFR Part 39 / Summary, FR page 12055"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g25",
+      "type": "ad_topic",
+      "question": "What maintenance procedures are required for Boeing 737-8, 737-9, and 737-8200 aircraft to resolve potential fuel seepage at the engine shutoff valve access cover?",
+      "answer": "For Boeing 737-8, 737-9, and 737-8200 airplanes, the required actions are detailed in Boeing Alert Requirements Bulletin 737-57A1358 RB, dated November 17, 2025 [3][4]. The detailed actions are not contained in the provided passages, as the AD directs compliance with the Accomplishment Instructions of that bulletin [3][4].\n\nGenerally, the required procedures include:\n*   A detailed inspection of the FiP gasket at the engine fuel shutoff valve access panel for correct sealant installation, or a detailed inspection of the panel for any damage on the preformed seal, depending on the aircraft configuration [2].\n*   A fluid leak test of the engine fuel shutoff valve access panel [2][4].\n*   If a leak is found, the FiP gasket must be replaced and the leak test repeated until no leak is found [4].\n*   If the bulletin specifies contacting Boeing for repair instructions, the repair must be done using a method approved in accordance with the procedures specified in paragraph (i) of the AD [4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.36,
+      "tokens": 2332,
+      "cited": [
+        "AD 2026-21-07, (a) Effective Date, FR page 67454",
+        "AD 2026-21-07, (a) Effective Date, FR page 67454",
+        "AD 2026-21-07, Material Incorporated by Reference Under 1 CFR Part 51, FR page 67453"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g27",
+      "type": "ad_topic",
+      "question": "What specific maintenance tasks are required for the center wing box spars on Airbus SAS Model A350-941 and -1041 aircraft to address the updated safety concerns?",
+      "answer": "For Airbus SAS Model A350-941 and -1041 aircraft, the required maintenance tasks for the center wing box (CWB) spars are as follows:\n\n*   **Fastener and Protection Actions:** AD 2025-14-09 requires replacing affected fasteners and applying additional head nut cap protection at the front and rear spars in the CWB [1]. The detailed actions for these requirements are specified in an EASA AD, which is incorporated by reference [2].\n*   **Sealant Inspections:** AD 2025-20-05 requires a one-time detailed inspection (DET) for missing or incorrectly applied sealant of the front and rear spars for certain airplanes, along with applicable corrective actions [3].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.88,
+      "tokens": 1772,
+      "cited": [
+        "AD 2025-14-09, 14 CFR Part 39 / Summary, FR page 34176",
+        "AD 2022-27-01, 14 CFR Part 39 / Summary, FR page 80026",
+        "AD 2025-20-05, 14 CFR Part 39 / Summary, FR page 53200"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.3333333333333333,
+      "false_abstention": false
+    },
+    {
+      "id": "g06",
+      "type": "ad_topic",
+      "question": "What specific component on Airbus A350-941 and -1041 aircraft requires replacement due to potential manufacturing defects identified by the engine sub-supplier?",
+      "answer": "The specific components requiring replacement are the engine bleed air system (EBAS) T-Ducts [5]. The detailed actions for this replacement are specified in a European Union Aviation Safety Agency (EASA) AD, which is incorporated by reference [5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 3.46,
+      "tokens": 1641,
+      "cited": [
+        "AD 2024-14-06, 14 CFR Part 39 / Summary, FR page 67535"
+      ],
+      "retrieved": true,
+      "correct": false,
+      "missing_facts": [
+        "RR03-11011-001"
+      ],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g38",
+      "type": "ad_topic",
+      "question": "What specific maintenance action is mandated for Airbus SAS Model A350-1041 aircraft experiencing acoustic disturbances and shaking near the wing-area underbody covers?",
+      "answer": "For Airbus SAS Model A350-1041 airplanes, AD 2022-25-21 requires a one-time detailed inspection of the belly fairing (BF) access panels [1]. Depending on the findings of this inspection, the AD requires the accomplishment of applicable corrective actions as specified in a European Union Aviation Safety Agency (EASA) AD, which is incorporated by reference [1]. The detailed actions are not in the provided passages [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 5.2,
+      "tokens": 1542,
+      "cited": [
+        "AD 2022-25-21, 14 CFR Part 39 / Summary, FR page 77502"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g21",
+      "type": "ad_topic",
+      "question": "What specific structural concern regarding the FR 96 foot radius on Airbus A350-941 aircraft necessitates fastener removal and inspection?",
+      "answer": "The structural concern is that an interference was detected between the installed nut and the foot radius of FR 96, between stringer 6 and stringer 7, on the right-hand side [1][2]. Further investigation showed that the minimum distances for nut installation were not fulfilled, resulting in damage to the FR 96 foot radius area on some airplanes [1]. If not addressed, this damage may affect the structural integrity of the airplane [1][2][3].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.64,
+      "tokens": 1623,
+      "cited": [
+        "AD 2023-03-07, Dates / Background, FR page 12141",
+        "AD 2023-03-07, (d) Subject / (e) Unsafe Condition / (f) Compliance, FR page 12143",
+        "AD 2023-03-07, Background / Comments / Conclusion, FR page 12142"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g19",
+      "type": "ad_topic",
+      "question": "What specific maintenance action is required for Airbus A350-941 and -1041 engine fire suppression lines to ensure they function correctly during an emergency?",
+      "answer": "For Airbus SAS Model A350-941 and -1041 airplanes, AD 2022-25-22 requires a one-time inspection of the engine fire extinguishing pipes for the presence of protective caps and the removal of any protective caps found [1]. The detailed actions for this requirement are specified in a European Union Aviation Safety Agency (EASA) AD, which is incorporated by reference [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.08,
+      "tokens": 1750,
+      "cited": [
+        "AD 2022-25-22, 14 CFR Part 39 / Summary, FR page 77500"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g36",
+      "type": "ad_topic",
+      "question": "What is the effective date for the updated airworthiness requirements concerning center wing box front spar stiffeners for Airbus A318, A319, A320, and A321 series aircraft?",
+      "answer": "The effective date for AD 2024-04-03, which concerns airworthiness limitations related to the center wing box front spar stiffeners for the specified Airbus models, is April 19, 2024 [2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 4.82,
+      "tokens": 2717,
+      "cited": [
+        "AD 2024-04-03, Dates / Background, FR page 18769"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "h08",
+      "type": "french",
+      "question": "Quel problème a été constaté sur l'axe de charnière arrière du train principal de l'ATR 72 ?",
+      "answer": "Le problème constaté est la rupture de l'axe de charnière arrière du train d'atterrissage principal (MLG) [1][2]. Des enquêtes ont révélé que certains axes ont subi une surchauffe non détectée lors du processus de rectification en production, ce qui peut entraîner leur rupture [5]. Les rapports font état d'axes présentant des fissures ou des brûlures, identifiés par la référence (P/N) D61000 [5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 3.14,
+      "tokens": 1669,
+      "cited": [
+        "AD 2025-04-04, 14 CFR Part 39 / Summary, FR page 10851",
+        "AD 2025-04-04, Sec.  39.13  [Amended] / (a) Effective Date / (b) Affected ADs / (c) Applicability / (d) Subject / (e) Unsafe Condition, FR page 10852",
+        "AD 2025-04-04, Dates / Background, FR page 10851"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "h09",
+      "type": "french",
+      "question": "Que dit la loi de Boyle ?",
+      "answer": "La loi de Boyle stipule que le volume d'un gaz sec enfermé varie inversement avec sa pression absolue, à condition que la température reste constante [2][5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 32.78,
+      "tokens": 1991,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > Boyle’s Law, page 5-24",
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Glossary, page G-2"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.5,
+      "false_abstention": false
+    },
+    {
+      "id": "g56",
+      "type": "handbook",
+      "question": "How do HI-LITE fasteners achieve weight savings compared to similar fastening systems without compromising their shear capacity?",
+      "answer": "HI-LITE™ fasteners achieve weight savings without lessening shear strength by having approximately one less thread [1][2]. Additionally, they feature a shorter transition area between the shank and the first load-bearing thread [2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.68,
+      "tokens": 2282,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 7: Aircraft Materials, Hardware, & Processes > Dzus Fasteners, page 7-64",
+        "FAA-H-8083-30B, Chapter 7: Aircraft Materials, Hardware, & Processes > Dzus Fasteners, page 7-64"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g66",
+      "type": "handbook",
+      "question": "What substances should be used to safely neutralize a spill of nickel-cadmium battery electrolyte?",
+      "answer": "To neutralize a spill of nickel-cadmium battery electrolyte on hands or clothes, use vinegar or a dilute boric acid solution consisting of one pound of boric acid per gallon of water [2]. When preparing a battery compartment for a nickel-cadmium battery replacement, the compartment must be neutralized with an ammonia or boric acid solution [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.64,
+      "tokens": 1981,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 12: Fundamentals of Electricity & Electronics > Sealed Lead Acid (SLA) Batteries, page 12-92",
+        "FAA-H-8083-30B, Chapter 12: Fundamentals of Electricity & Electronics > Sealed Lead Acid (SLA) Batteries, page 12-92"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g64",
+      "type": "handbook",
+      "question": "How is the total opposition to current flow calculated in an alternating current circuit that includes both resistance and inductive reactance?",
+      "answer": "In an AC circuit containing resistance and inductance, the total opposition to current flow, known as impedance (Z), is calculated using the Pythagorean theorem [1][2]. The relationship is expressed by the formula: Z = R² + XL² [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 30.33,
+      "tokens": 2210,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 12: Fundamentals of Electricity & Electronics > Solution:, page 12-60",
+        "FAA-H-8083-30B, Chapter 12: Fundamentals of Electricity & Electronics > Series AC Circuits, page 12-59"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.5,
+      "false_abstention": false
+    },
+    {
+      "id": "g55",
+      "type": "handbook",
+      "question": "Under what circumstances should a technician select a blind lockbolt for a structural repair?",
+      "answer": "A technician should select a blind lockbolt for a structural repair when only one side of the work is accessible and, generally, where it is difficult to drive a conventional rivet [2]. Additionally, blind lockbolts may be used to replace solid aluminum-alloy rivets, stainless steel rivets, or all blind rivets of the same diameter [1][2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 18.92,
+      "tokens": 2089,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 7: Aircraft Materials, Hardware, & Processes > Non-Self-Locking Nuts, page 7-41",
+        "FAA-H-8083-30B, Chapter 7: Aircraft Materials, Hardware, & Processes > Non-Self-Locking Nuts, page 7-41"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g65",
+      "type": "handbook",
+      "question": "How often must an aircraft's altimeter and static system be inspected for IFR flight operations?",
+      "answer": "An aircraft operated in controlled airspace under instrument flight rules (IFR) must have its altimeter and static system tested within the preceding 24 calendar months [1]. This requirement, commonly referred to as the \"411 test,\" specifies that the static pressure system, each altimeter instrument, and each automatic pressure altitude reporting system must be tested every 24 calendar months [2][3].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 15.17,
+      "tokens": 2311,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 10: Inspection Concepts & Techniques > Special Inspections, page 10-12",
+        "FAA-H-8083-30B, Chapter 2: Regulations, Maintenance Forms, Records, & Publications > Subpart E—Maintenance, Preventive Maintenance, and Alterations, page 2-22",
+        "FAA-H-8083-30B, Chapter 2: Regulations, Maintenance Forms, Records, & Publications > Subpart E—Maintenance, Preventive Maintenance, and Alterations, page 2-22"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.3333333333333333,
+      "false_abstention": false
+    },
+    {
+      "id": "g63",
+      "type": "handbook",
+      "question": "What is the primary reason aluminum is favored for building aircraft structures?",
+      "answer": "Aluminum is vital to the aviation industry because of its high strength-to-weight ratio and its comparative ease of fabrication [3]. Its outstanding characteristic is its lightweight [3].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 12.22,
+      "tokens": 2096,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 7: Aircraft Materials, Hardware, & Processes > Aluminum & Aluminum Alloys, page 7-5"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g60",
+      "type": "handbook",
+      "question": "What is the minimum flashpoint requirement for solvent cleaners used in aircraft maintenance to bypass the need for specialized explosion-proof equipment?",
+      "answer": "In general, solvent cleaners used in aircraft cleaning must have a flashpoint of not less than 105 °F to avoid the need for explosion-proof equipment and other special precautions [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.79,
+      "tokens": 2020,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 8: Cleaning & Corrosion Control > Cleaning Compound for Oxygen Systems, page 8-27"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g53",
+      "type": "handbook",
+      "question": "What are the standard atmospheric pressure values at sea level expressed in both pounds per square inch and inches of mercury?",
+      "answer": "Standard atmospheric pressure at sea level is 14.7 psi and 29.92 inches of mercury (\"Hg) [1][3][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.37,
+      "tokens": 2030,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > Water Content of the Atmosphere, page 5-34",
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > Pressure, page 5-22",
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > Water Content of the Atmosphere, page 5-34"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.6666666666666666,
+      "false_abstention": false
+    },
+    {
+      "id": "g50",
+      "type": "handbook",
+      "question": "What is the primary mechanical distinction in how an alternator connects to an external circuit compared to a direct current generator?",
+      "answer": "The alternator is connected to the external circuit by slip rings, whereas the DC generator is connected by a commutator [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 5.89,
+      "tokens": 1906,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 12: Fundamentals of Electricity & Electronics > Number of Phases, page 12-154"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g59",
+      "type": "handbook",
+      "question": "What is the standard procedure for managing steel corrosion on aircraft parts?",
+      "answer": "The procedure for managing steel corrosion depends on the specific application and the stress level of the part:\n\n*   **General Surface Cleaning:** Original surface treatments typically involve cleaning to remove dirt, oil, grease, oxides, and moisture using mechanical methods (wire brush, steel wool, emery cloth, sandblasting, or vapor blasting) or chemical methods [3]. Chemical cleaning is preferred because it does not remove base metal [3]. Steel parts may be pickled using sulfuric or muriatic acid to remove scale or rust, followed by a lime bath to neutralize the acid if the part is not being electroplated [3]. Electrocleaning in a hot alkaline solution may also be used to remove grease, oil, or organic matter [3].\n*   **Highly Stressed Steel Parts:** Corrosion must be removed carefully using mild abrasive papers (such as rouge or fine grit aluminum oxide) or fine buffing compounds on cloth buffing wheels [4]. Nonwoven abrasive pads may also be used [4]. It is essential to avoid overheating the steel surface during buffing [4]. After removal, protective paint finishes must be reapplied immediately [4]. The use of chemical corrosion removers on these parts is prohibited without engineering authorization due to the risk of hydrogen embrittlement [4].\n*   **Cables:** Light external corrosion can be removed with a nonwoven abrasive pad lightly soaked in oil or a steel wire brush [1]. Once removed, the cable must be recoated with preservative [1]. Cables with internal corrosion must be replaced [1].\n*   **General Restrictions:** The use of inhibitors on installed steel parts is considered dangerous and undesirable due to the risk of entrapment and uncontrolled attack [4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.72,
+      "tokens": 2306,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 8: Cleaning & Corrosion Control > Surface Preparation, page 8-21",
+        "FAA-H-8083-30B, Chapter 8: Cleaning & Corrosion Control > Corrosion of Aluminum & Aluminum Alloys, page 8-17",
+        "FAA-H-8083-30B, Chapter 8: Cleaning & Corrosion Control > Surface Cleaning and Paint Removal, page 8-14"
+      ],
+      "retrieved": false,
+      "correct": false,
+      "missing_facts": [
+        "coating"
+      ],
+      "citation_precision": 0.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g45",
+      "type": "handbook",
+      "question": "What is the primary application for natural rubber within aircraft fluid systems?",
+      "answer": "Natural rubber is used as a sealing material for water/methanol systems [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.21,
+      "tokens": 1937,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 7: Aircraft Materials, Hardware, & Processes > Synthetic Rubber, page 7-32"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g61",
+      "type": "handbook",
+      "question": "What specific categories of material flaws can be identified using magnetic particle inspection?",
+      "answer": "The provided passages do not list specific categories of material flaws that can be identified using magnetic particle inspection, though they note the method is used for detecting invisible cracks and other defects in ferromagnetic materials.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 6.5,
+      "tokens": 1930,
+      "cited": [],
+      "retrieved": true,
+      "correct": false,
+      "missing_facts": [
+        "inclusion"
+      ],
+      "citation_precision": null,
+      "false_abstention": true
+    },
+    {
+      "id": "g47",
+      "type": "handbook",
+      "question": "When performing calculations involving exponents, what term describes the primary digit that is being multiplied by itself?",
+      "answer": "The term that describes the primary digit being multiplied by itself is the base [1][2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.8,
+      "tokens": 2199,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Glossary, page G-8",
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Glossary, page G-5"
+      ],
+      "retrieved": false,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.0,
+      "false_abstention": false
+    },
+    {
+      "id": "g46",
+      "type": "handbook",
+      "question": "How is the center of gravity determined once the final weight and moment values are established for an aircraft?",
+      "answer": "The center of gravity (CG) is determined by dividing the total moment by the total weight [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.9,
+      "tokens": 2486,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 6: Aircraft Weight & Balance > Manufacturer-Furnished Information, page 6-6"
+      ],
+      "retrieved": false,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.0,
+      "false_abstention": false
+    },
+    {
+      "id": "h06",
+      "type": "multi_doc",
+      "question": "Which emergency ADs are included in the documents?",
+      "answer": "The emergency ADs included in the documents are:\n\n*   Emergency AD 2025-24-51 [3][4].\n*   Emergency AD 2024-02-51 [5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.73,
+      "tokens": 1841,
+      "cited": [
+        "AD 2025-24-51, (b) Affected ADs / (c) Applicability / (d) Subject, FR page 201",
+        "AD 2025-24-51, Explanation of Required Compliance Information, FR page 200",
+        "AD 2024-02-51, Dates / Background, FR page 3337"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "h07",
+      "type": "multi_doc",
+      "question": "How many airworthiness directives concerning the ATR 72 are in the documents?",
+      "answer": "The provided documents contain information regarding the following airworthiness directives that concern the ATR 72:\n\n*   **AD 2026-08-08**: Concerns the ATR 72 and references EASA AD 2025-0006 [1].\n*   **AD 2023-17-01**: Applies to Model ATR 72-101, ATR 72-102, ATR 72-201, ATR 72-202, ATR 72-211, ATR 72-212, and ATR 72-212A [2].\n*   **AD 2023-06-01**: Applies to Model ATR 72-212A airplanes [3].\n*   **AD 2026-16-07**: Incorporates by reference ATR Service Bulletin ATR72-55-1013 and ATR72-55-1018 [5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.97,
+      "tokens": 2919,
+      "cited": [
+        "AD 2026-08-08, (f) Compliance / (g) Requirements / (h) Exceptions to EASA AD 2025-0006, FR page 23004",
+        "AD 2023-17-01, Dates / Background, FR page 63007",
+        "AD 2023-06-01, Dates / Background, FR page 22370",
+        "AD 2026-16-07, (k) Additional Information / (l) Material Incorporated by Reference, FR page 52486"
+      ],
+      "retrieved": false,
+      "correct": false,
+      "missing_facts": [
+        "24"
+      ],
+      "citation_precision": 0.0,
+      "false_abstention": false
+    },
+    {
+      "id": "h01",
+      "type": "near_miss",
+      "question": "What unsafe condition does AD 2025-18-03 address?",
+      "answer": "AD 2025-18-03 addresses a production deficiency involving missing heat treatment of the actuation pin of the SafeLav gaseous oxygen container (SLGOC) [1]. This deficiency could cause the actuation pin to jam, resulting in a failure of oxygen flow activation [1]. If not addressed, this could lead to a lack of supplemental oxygen supply during a cabin or lavatory decompression, potentially causing injury to lavatory occupants [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.54,
+      "tokens": 1386,
+      "cited": [
+        "AD 2025-18-03, (d) Subject / (e) Unsafe Condition, FR page 44320"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "h02",
+      "type": "superseded",
+      "question": "Which AD replaced AD 2023-02-18?",
+      "answer": "AD 2025-20-12 replaced AD 2023-02-18 [1][5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.98,
+      "tokens": 1603,
+      "cited": [
+        "AD 2025-20-12, (a) Effective Date / (b) Affected ADs / (c) Applicability / (d) Subject / (e) Unsafe Condition, FR page 53207",
+        "AD 2025-20-12, 14 CFR Part 39 / Summary, FR page 53206"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "u09",
+      "type": "unanswerable",
+      "question": "How many Airbus A321neo airplanes are registered in the United States?",
+      "answer": "The provided passages do not contain information regarding the number of Airbus A321neo airplanes registered in the United States.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.36,
+      "tokens": 2577,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u03",
+      "type": "unanswerable",
+      "question": "What is the unsafe condition addressed by AD 2024-08-03?",
+      "answer": "The provided passages do not contain information regarding AD 2024-08-03.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 9.6,
+      "tokens": 994,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u06",
+      "type": "unanswerable",
+      "question": "What is the civil penalty for an operator who flies an airplane without complying with an AD?",
+      "answer": "The provided passages do not contain information regarding civil penalties for operators who fly an airplane without complying with an AD.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 3.77,
+      "tokens": 1286,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u15",
+      "type": "unanswerable",
+      "question": "Who is the chief executive of ATR?",
+      "answer": "The provided passages do not contain information regarding the chief executive of ATR.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 13.8,
+      "tokens": 2483,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u11",
+      "type": "unanswerable",
+      "question": "Which airworthiness directives were issued for the Embraer E175 in 2025?",
+      "answer": "The provided passages do not contain information regarding airworthiness directives for the Embraer E175.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 21.44,
+      "tokens": 2533,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u08",
+      "type": "unanswerable",
+      "question": "Which airline operated the A320 whose uncommanded pitch-down event led to AD 2025-24-51?",
+      "answer": "The provided passages do not state the name of the airline that operated the A320 involved in the pitch-down event.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.78,
+      "tokens": 1948,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u07",
+      "type": "unanswerable",
+      "question": "What is the tire pressure of the Airbus A350-1000 main landing gear wheels?",
+      "answer": "The provided passages do not contain information regarding the tire pressure of the Airbus A350-1000 main landing gear wheels.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.6,
+      "tokens": 1344,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u13",
+      "type": "unanswerable",
+      "question": "What is the maximum operating altitude of the ATR 72?",
+      "answer": "The provided passages do not contain information regarding the maximum operating altitude of the ATR 72.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.81,
+      "tokens": 2703,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u05",
+      "type": "unanswerable",
+      "question": "Which engine model powers the ATR 72-600?",
+      "answer": "The provided passages do not contain information regarding the engine model that powers the ATR 72-600.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.7,
+      "tokens": 1944,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u14",
+      "type": "unanswerable",
+      "question": "When will the FAA publish its next airworthiness directive for the Boeing 737-8?",
+      "answer": "The provided passages do not contain information regarding the future publication schedule of airworthiness directives.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.66,
+      "tokens": 1578,
+      "cited": [],
+      "correct_abstention": true
+    }
+  ]
+}

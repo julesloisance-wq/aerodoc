@@ -21,3 +21,13 @@ def test_looks_french():
 
     assert looks_french("Quels avions sont concernés par l'AD 2026-18-03 ?")
     assert not looks_french("Which airplanes are affected by AD 2026-18-03?")
+
+
+def test_ad_number_pattern():
+    from aerodoc.search import AD_NUMBER
+
+    assert AD_NUMBER.findall("Is AD 2025-13-12 superseded by 2025-25-12?") == [
+        "2025-13-12",
+        "2025-25-12",
+    ]
+    assert AD_NUMBER.findall("EASA AD 2026-0142") == []

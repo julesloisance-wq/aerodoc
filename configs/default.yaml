@@ -38,6 +38,9 @@ retrieval:
   rerank: true
   rerank_top_n: 20      # fused candidates re-read by the cross-encoder
   reranker_model: cross-encoder/ms-marco-MiniLM-L6-v2
+  # Metadata match: when the question names an AD present in the corpus, keep 3 of its
+  # chunks among the top 5 (the generic reranker ignores exact identifiers).
+  ad_number_slots: 3
 
 llm:
   # Any OpenAI-compatible endpoint. Gemini (free tier of Google AI Studio) by default.

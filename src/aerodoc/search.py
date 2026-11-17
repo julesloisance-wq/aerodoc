@@ -144,6 +144,20 @@ def rerank(query: str, hits: list[Hit], model: str) -> list[Hit]:
     return sorted(hits, key=lambda h: -h.score)
 
 
+AD_NUMBER = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
+
+
+def mentioned_ads(conn: psycopg.Connection, query: str) -> list[str]:
+    """AD numbers written in the question that exist in the corpus."""
+    numbers = AD_NUMBER.findall(query)
+    if not numbers:
+        return []
+    rows = conn.execute(
+        "SELECT ad_number FROM documents WHERE ad_number = ANY(%s)", (numbers,)
+    ).fetchall()
+    return [r[0] for r in rows]
+
+
 # --------------------------------------------------------------------------- retrieval
 def _dense_ids(conn, query: str, cfg: PipelineConfig, n: int) -> list[tuple[int, float]]:
     vector = embed_query(query, cfg.embedding)
@@ -182,13 +196,25 @@ def retrieve(
         rankings["bm25"] = keyword_index(conn).search(query, rc.candidates)
         timings["bm25"] = (time.perf_counter() - t) * 1000
 
-    if rc.mode == "hybrid":
-        fused = rrf({name: [cid for cid, _ in r] for name, r in rankings.items()}, rc.rrf_k)
-    else:
+    ids = {name: [cid for cid, _ in r] for name, r in rankings.items()}
+    if rc.mode != "hybrid":
         fused = rankings[rc.mode]
+    else:
+        fused = rrf(ids, rc.rrf_k)
 
     pool = rc.rerank_top_n if rc.rerank else k
-    hits = _load_hits(conn, fused[:pool])
+    candidates = fused[:pool]
+    # Metadata match: chunks of a directive named in the question always reach the reranker.
+    named = mentioned_ads(conn, query) if rc.ad_number_slots else []
+    if named:
+        in_pool = {cid for cid, _ in candidates}
+        rows = conn.execute(
+            "SELECT c.id FROM chunks c JOIN documents d ON d.id = c.document_id "
+            "WHERE d.ad_number = ANY(%s) ORDER BY c.id",
+            (named,),
+        ).fetchall()
+        candidates += [(r[0], 0.0) for r in rows if r[0] not in in_pool]
+    hits = _load_hits(conn, candidates)
     for hit in hits:
         for name, ranking in rankings.items():
             ids = [cid for cid, _ in ranking]
@@ -199,6 +225,11 @@ def retrieve(
         t = time.perf_counter()
         hits = rerank(query, hits, rc.reranker_model)
         timings["rerank"] = (time.perf_counter() - t) * 1000
+    if named:
+        # Reserve slots for the named directive(s), fill the rest with the best other chunks.
+        own = [h for h in hits if h.ad_number in named][: rc.ad_number_slots]
+        others = [h for h in hits if h not in own][: k - len(own)]
+        hits = sorted(own + others, key=lambda h: -h.score)
     return Retrieval(hits[:k], timings)
 
 

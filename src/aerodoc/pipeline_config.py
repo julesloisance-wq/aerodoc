@@ -31,6 +31,9 @@ class RetrievalConfig(BaseModel):
     rerank: bool = True
     rerank_top_n: int = 20  # fused candidates re-scored by the cross-encoder
     reranker_model: str = "cross-encoder/ms-marco-MiniLM-L6-v2"
+    # When the question names an AD that exists in the corpus, keep up to this many of its
+    # chunks among the top_k (0 disables this metadata match).
+    ad_number_slots: int = 0
 
 
 class LLMConfig(BaseModel):
