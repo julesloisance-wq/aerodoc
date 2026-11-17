@@ -1,0 +1,422 @@
+{
+  "date": "2026-11-17T17:22:00",
+  "config": "configs/default.yaml",
+  "config_values": {
+    "embedding": {
+      "model": "BAAI/bge-small-en-v1.5",
+      "dimension": 384,
+      "query_prefix": "Represent this sentence for searching relevant passages: ",
+      "batch_size": 32
+    },
+    "chunking": {
+      "max_words": 250,
+      "overlap_words": 40,
+      "min_words": 80,
+      "skip_sections": [
+        "Agency",
+        "Action",
+        "Addresses",
+        "For Further Information Contact",
+        "Comments Invited",
+        "Confidential Business Information",
+        "Regulatory Flexibility Act",
+        "Paperwork Reduction Act",
+        "Authority for This Rulemaking",
+        "Regulatory Findings",
+        "List of Subjects in 14 CFR Part 39"
+      ]
+    },
+    "retrieval": {
+      "top_k": 5,
+      "mode": "hybrid",
+      "candidates": 30,
+      "rrf_k": 60,
+      "rerank": true,
+      "rerank_top_n": 20,
+      "reranker_model": "cross-encoder/ms-marco-MiniLM-L6-v2"
+    },
+    "llm": {
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash"
+      ],
+      "temperature": 0.0,
+      "max_tokens": 1024,
+      "timeout_s": 60.0,
+      "retries": 2
+    }
+  },
+  "summary": {
+    "questions": 20,
+    "retrieval_hit@5": 1.0,
+    "answer_correct": 1.0,
+    "citation_precision": 0.859375,
+    "false_abstention": 0.0,
+    "correct_abstention": 1.0,
+    "median_latency_s": 5.154999999999999,
+    "max_latency_s": 30.39,
+    "mean_tokens": 1992.3,
+    "answer_correct_by_type": {
+      "ad_number": 1.0,
+      "ad_topic": 1.0,
+      "ad_applicability": 1.0,
+      "handbook": 1.0
+    }
+  },
+  "rows": [
+    {
+      "id": "q01",
+      "type": "ad_number",
+      "question": "What does AD 2025-24-51 address, and what event prompted it?",
+      "answer": "AD 2025-24-51 addresses a malfunction of the affected elevator aileron computer (ELAC) [1][4]. This malfunction could lead to an uncommanded elevator movement that may result in exceeding the aircraft's structural capability and the consequent loss of continued safe flight and landing [1][4]. The AD was prompted by an uncommanded and limited pitch down event that occurred on an Airbus A320 airplane, during which the autopilot remained engaged and there was a brief and limited loss of altitude [1][3][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 14.44,
+      "tokens": 2130,
+      "cited": [
+        "AD 2025-24-51, (e) Unsafe Condition / (f) Compliance, FR page 202",
+        "AD 2025-24-51, Background, FR page 200",
+        "AD 2025-24-51, 14 CFR Part 39 / Summary, FR page 199"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q02",
+      "type": "ad_number",
+      "question": "Which EASA AD must be followed to comply with AD 2024-08-02?",
+      "answer": "To comply with AD 2024-08-02, you must follow the required actions and compliance times specified in EASA AD 2023-0181, except as specified in paragraph (h) of AD 2024-08-02 [1]. The detailed actions are not in the passages [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 30.39,
+      "tokens": 2188,
+      "cited": [
+        "AD 2024-08-02, (g) Requirements / (h) Exceptions to EASA AD 2023-0181 / (i) Additional AD Provisions, FR page 35703"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q03",
+      "type": "ad_number",
+      "question": "Which earlier AD does AD 2023-12-11 replace?",
+      "answer": "AD 2023-12-11 replaces Airworthiness Directive (AD) 2022-03-20, Amendment 39-21937 [2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 14.17,
+      "tokens": 2006,
+      "cited": [
+        "AD 2023-12-11, The Amendment / PART 39--AIRWORTHINESS DIRECTIVES / Sec.  39.13   [Amended], FR page 40012"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q04",
+      "type": "ad_number",
+      "question": "What is the effective date of AD 2022-27-01?",
+      "answer": "The effective date of AD 2022-27-01 is February 2, 2023 [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 16.39,
+      "tokens": 1715,
+      "cited": [
+        "AD 2022-27-01, PART 39--AIRWORTHINESS DIRECTIVES / Sec.  39.13  [Amended] / (a) Effective Date / (b) Affected ADs / (c) Applicability, FR page 80027"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q05",
+      "type": "ad_topic",
+      "question": "Which AD addresses water entering the lower lobe electronic equipment bay of the Boeing 737-800, and what equipment could the water damage?",
+      "answer": "AD 2022-08-05 addresses water ingress in the lower lobe electronic equipment (EE) bay of certain The Boeing Company Model 737-800 series airplanes [1][2]. The water could damage EE bay line replacement units (LRUs) in the E5 rack, specifically the air data inertial reference units and flight management computers [1][2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 12.58,
+      "tokens": 1591,
+      "cited": [
+        "AD 2022-08-05, (d) Subject / (e) Unsafe Condition, FR page 24036",
+        "AD 2022-08-05, 14 CFR Part 39 / Summary, FR page 24034"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q06",
+      "type": "ad_topic",
+      "question": "Why must some fasteners in the A350 center wing box be replaced, and what is the worst-case risk?",
+      "answer": "Fasteners in the center wing box (CWB) must be replaced because they have been reported to rotate inside their fastener holes [1][3][4]. This rotation is caused by insufficient friction for the application [2][4].\n\nThe worst-case risk depends on the specific AD:\n* For AD 2022-27-01, the risk is a fuel tank explosion and consequent loss of the airplane in the event of a lightning strike [1].\n* For AD 2023-25-15, the risk is fuel vapor leakage inside the cabin, which could result in injury to airplane occupants [2].\n\nRegarding the detailed actions for replacement, these are specified in a European Union Aviation Safety Agency (EASA) AD, which is incorporated by reference [3][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 19.64,
+      "tokens": 1555,
+      "cited": [
+        "AD 2022-27-01, (d) Subject / (e) Unsafe Condition, FR page 80027",
+        "AD 2022-27-01, 14 CFR Part 39 / Summary, FR page 80026",
+        "AD 2023-25-15, 14 CFR Part 39 / Summary, FR page 235",
+        "AD 2023-25-15, (d) Subject / (e) Unsafe Condition, FR page 237"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.5,
+      "false_abstention": false
+    },
+    {
+      "id": "q07",
+      "type": "ad_topic",
+      "question": "What manufacturing defect was found on A320 family main landing gear aft pintle pins, and what could it lead to?",
+      "answer": "The main landing gear (MLG) aft pintle pins were found to have been manufactured without nickel plating applied to the inner bore [1][3]. If not corrected, this condition could lead to the development of corrosion with potential crack initiation in the affected parts, which could result in an MLG collapse, damage to the airplane, and injury to occupants [1][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.59,
+      "tokens": 1305,
+      "cited": [
+        "AD 2025-17-17, (d) Subject / (e) Unsafe Condition, FR page 42314",
+        "AD 2025-17-17, 14 CFR Part 39 / Summary, FR page 42312",
+        "AD 2025-17-17, Background / Material Incorporated by Reference Under 1 CFR Part 51, FR page 42313"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q08",
+      "type": "ad_topic",
+      "question": "According to the FAA, what happens when certain Ni-Cd batteries are repeatedly disconnected and reconnected during airplane parking or storage?",
+      "answer": "Repetitive disconnection and reconnection of certain Ni-Cd batteries during airplane parking or storage could lead to a reduction in the capacity of those batteries [1][3]. This condition could result in reduced battery endurance performance and potentially lead to a failure to supply the minimum essential electrical power during abnormal or emergency conditions [1][2][5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 6.09,
+      "tokens": 2082,
+      "cited": [
+        "AD 2024-11-01, (d) Subject / (e) Unsafe Condition / (f) Compliance, FR page 46321",
+        "AD 2024-08-08, 14 CFR Part 39 / Summary, FR page 35695",
+        "AD 2024-08-08, Background, FR page 35696",
+        "AD 2024-08-08, Dates / Background, FR page 35695"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.75,
+      "false_abstention": false
+    },
+    {
+      "id": "q09",
+      "type": "ad_applicability",
+      "question": "Which Boeing 737 models are covered by AD 2023-12-11 on radio altimeter interference?",
+      "answer": "AD 2023-12-11 applies to all The Boeing Company Model 737-8, 737-9, and 737-8200 airplanes [2].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.69,
+      "tokens": 2465,
+      "cited": [
+        "AD 2023-12-11, Dates / Background, FR page 40011"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q10",
+      "type": "ad_applicability",
+      "question": "Which airplane models are affected by AD 2024-20-01 on the aft galley attachment studs?",
+      "answer": "AD 2024-20-01 applies to certain Airbus SAS Model A350-941 and -1041 airplanes [3][4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.82,
+      "tokens": 1717,
+      "cited": [
+        "AD 2024-20-01, Dates / Background, FR page 84801",
+        "AD 2024-20-01, 14 CFR Part 39 / Summary, FR page 84801"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q11",
+      "type": "ad_applicability",
+      "question": "Which ATR models are affected by AD 2024-08-02?",
+      "answer": "AD 2024-08-02 applies to ATR--GIE Avions de Transport Régional Model ATR42-200, -300, -320, and -500; and ATR72-101, -102, -201, -202, -211, -212, and -212A airplanes, except those on which ATR modification (mod) 05948 has been embodied in production [4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 7.31,
+      "tokens": 1798,
+      "cited": [
+        "AD 2024-08-02, Dates / Background, FR page 35701"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q12",
+      "type": "handbook",
+      "question": "What is the Maintenance Error Decision Aid (MEDA) used for?",
+      "answer": "The Maintenance Error Decision Aid (MEDA) is a human factors tool used to investigate maintenance problems [1]. Its goal is to investigate errors, understand their root causes, and prevent accidents, rather than simply placing blame on maintenance personnel [1]. By using the MEDA process, an organization can discover exactly what led to an error and fix the contributing factors [2]. Successful implementation allows an organization to avoid rework, lost revenue, and potentially dangerous situations [2]. Additionally, it helps maintenance organizations achieve the goals of identifying factors that contribute to existing errors and avoiding future errors [4].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.57,
+      "tokens": 1997,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Resources, page 14-10",
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Resources, page 14-11",
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Resources, page 14-11"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.3333333333333333,
+      "false_abstention": false
+    },
+    {
+      "id": "q13",
+      "type": "handbook",
+      "question": "What are the three basic parts of a lever?",
+      "answer": "The three basic parts of a lever are the fulcrum “F,” a force or effort “E,” and a resistance “R” [1][2][3].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 3.46,
+      "tokens": 2053,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > First Class Lever, page 5-8",
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Glossary, page G-6",
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > Mechanical Advantage of Machines / Chapter 5: Physics for Aviation > First Class Lever, page 5-7"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.6666666666666666,
+      "false_abstention": false
+    },
+    {
+      "id": "q14",
+      "type": "handbook",
+      "question": "What does Boyle's law state?",
+      "answer": "Boyle's law states that the volume of an enclosed dry gas varies inversely with its absolute pressure, provided the temperature remains constant [2][5].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 4.96,
+      "tokens": 1987,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > Boyle’s Law, page 5-24",
+        "FAA-H-8083-30B, Chapter 14: Human Factors > Glossary, page G-2"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 0.5,
+      "false_abstention": false
+    },
+    {
+      "id": "q15",
+      "type": "handbook",
+      "question": "Into which three groups can potential energy be classified?",
+      "answer": "Potential energy can be classified into the following three groups: (1) energy due to position, (2) energy due to distortion of an elastic body, and (3) energy which produces work through chemical action [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 7.35,
+      "tokens": 2108,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > Potential Energy / Chapter 5: Physics for Aviation > Kinetic Energy, page 5-2"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q16",
+      "type": "handbook",
+      "question": "What happens to the velocity, pressure and density of supersonic air flowing through a converging passage?",
+      "answer": "When supersonic air flows through a converging passage, its velocity decreases and its pressure and density both increase [1].",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 5.35,
+      "tokens": 1989,
+      "cited": [
+        "FAA-H-8083-30B, Chapter 5: Physics for Aviation > The Speed of Sound, page 5-46"
+      ],
+      "retrieved": true,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": 1.0,
+      "false_abstention": false
+    },
+    {
+      "id": "q17",
+      "type": "unanswerable",
+      "question": "What is the maximum takeoff weight of the ATR 72-600?",
+      "answer": "The provided passages do not contain information regarding the ATR 72-600.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.4,
+      "tokens": 2618,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "q18",
+      "type": "unanswerable",
+      "question": "Which airworthiness directives were issued for the Embraer E190 in 2024?",
+      "answer": "The provided passages do not contain information regarding airworthiness directives for the Embraer E190.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.76,
+      "tokens": 2523,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "q19",
+      "type": "unanswerable",
+      "question": "What torque value must be applied to the bolts when replacing the A320 main landing gear aft pintle pins?",
+      "answer": "The provided passages do not specify the torque values required for replacing the main landing gear aft pintle pins on Airbus SAS Model A320 airplanes.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.3,
+      "tokens": 1596,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "q20",
+      "type": "unanswerable",
+      "question": "Who is the current FAA Administrator?",
+      "answer": "The provided documents do not contain information regarding the identity of the current FAA Administrator.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 3.25,
+      "tokens": 2423,
+      "cited": [],
+      "correct_abstention": true
+    }
+  ]
+}

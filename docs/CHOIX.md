@@ -310,10 +310,28 @@ C'est suffisant pour justifier les choix et donner un chiffre crédible.
 
 **Les limites.** Avec si peu de questions, les écarts de quelques points ne sont pas significatifs. En production, il faudrait des centaines de questions, idéalement posées par de vrais techniciens.
 
-### 8.2 Configuration versionnée, mesures notées
+### 8.2 Le test de qualité : 20 questions, vérification par mots-clés, pas de juge LLM
+**Le problème.** Prouver que le système marche, avec un chiffre crédible, sans y passer une journée.
+
+**Les options.**
+- un grand jeu de questions avec séparation dev/test et un LLM-juge calibré sur des notes humaines (le plan initial) ;
+- **un petit jeu de 20 questions validées à la main, avec des mots-clés attendus**.
+
+**Le choix et pourquoi : le petit jeu.**
+- **20 questions variées** : par numéro de consigne, par sujet, avions concernés, manuel, et 20 % de questions sans réponse.
+- **Questions validées par Jules avant de voir les scores** : sinon, on adapte inconsciemment le test au système.
+- **Mots-clés plutôt qu'un juge LLM** : simple, gratuit, transparent et reproductible. Un juge LLM doit lui-même être évalué (accord avec un humain), ce qui double le travail.
+- **Mesurer les deux côtés de l'abstention** : un assistant qui dit toujours « je ne sais pas » aurait 100 % de bonnes abstentions ; on compte donc aussi les abstentions à tort.
+- **Séparer recherche et réponse** : en cas d'erreur, on sait si c'est la recherche ou le LLM qui a échoué.
+
+**Les limites.** Peu de questions ; mots-clés grossiers (d'où la relecture manuelle) ; questions écrites à partir des documents.
+
+**En entretien.** « J'ai construit un petit jeu de 20 questions que j'ai validé avant de lancer l'évaluation, dont 20 % sans réponse. Je mesure séparément la recherche, la justesse, les citations et les deux côtés de l'abstention. Résultat : 16 réponses justes sur 16, 4 abstentions correctes sur 4, aucune abstention à tort, 5 secondes en médiane. Je reste prudent : 20 questions, c'est un test de fonctionnement, pas une preuve statistique. »
+
+### 8.3 Configuration versionnée, mesures notées
 Tous les paramètres sont dans `configs/default.yaml`, versionné dans Git. Chaque mesure est notée dans `EXPERIMENTS.md`. On peut donc toujours dire quelle configuration a produit quel résultat.
 
-### 8.3 Le rôle de l'IA dans le projet
+### 8.4 Le rôle de l'IA dans le projet
 Le code a été écrit par un assistant de code IA (Claude Code). Le rôle de Jules :
 - concevoir le système et définir les priorités (simplicité, rapidité, compréhension) ;
 - valider chaque choix technique à partir des mesures ;

@@ -59,3 +59,33 @@ round) with flash-lite first: warm end-to-end latency 1.6-5.6 s
 French questions: without translation, "Quels avions sont concernés par l'AD 2026-18-03 ?"
 retrieved no applicability passage and the assistant abstained; with LLM translation of
 French queries for retrieval it answers correctly (in French).
+
+
+## 2026-11-17 — Quality test, 20 questions (step 6)
+
+Question set `eval/questions.jsonl` reviewed and validated by Jules before the run
+(16 answerable: 4 AD by number, 4 AD by topic, 3 applicability, 5 handbook; 4 unanswerable).
+Config `configs/default.yaml` (hybrid + MiniLM reranker, gemini-3.1-flash-lite).
+Raw results: `eval/results/2026-11-17_1722_default.json`.
+
+| Metric | Value |
+|---|---|
+| Relevant passage among the 5 given to the LLM | 16/16 (100 %) |
+| Correct answers (all key facts present, no abstention) | 16/16 (100 %) |
+| Citation precision (cited passages from the expected source) | 86 % |
+| Correct abstentions (unanswerable questions) | 4/4 (100 %) |
+| Wrong abstentions (answerable questions) | 0/16 (0 %) |
+| Latency median / max | 5.2 s / 30.4 s |
+| Tokens per question (mean) | 1,992 |
+
+Manual check: the answers were read one by one and are consistent with the key-fact check.
+All 7 questions with citation precision < 100 % cite passages that are relevant but not the
+expected source: neighbouring handbook page (14-11), handbook glossary (G-2, G-6), or another
+directive on the same issue (AD 2023-25-15, AD 2024-11-01). Citation precision as measured
+here is therefore a lower bound.
+
+Latency: the first questions took 12-30 s because of free-tier rate limiting (model switch and
+back-off); median 5.2 s.
+
+Caveats: 20 questions only (one question = 6 points on answerable metrics); key-fact matching is
+a coarse proxy for correctness; questions were written from the passages.

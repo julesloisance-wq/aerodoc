@@ -309,3 +309,44 @@ La toute première question après le démarrage prend environ 10 s de plus : il
 ### Limites observées
 - Pour « What are the detailed inspection steps required by EASA AD 2026-0142? », l'assistant s'abstient, ce qui est juste sur le fond (le détail n'est pas dans le corpus), mais le reranker a écarté les passages de l'AD 2026-18-03 qui citent cette consigne : l'idéal aurait été de dire « l'AD 2026-18-03 renvoie à cette consigne, dont le détail n'est pas disponible ».
 - Le reranker MiniLM est générique (questions web) : il peut écarter un bon passage dans des formulations inhabituelles.
+
+---
+
+## Étape 6 — Le petit test de qualité
+
+### Ce qui a été construit
+- `eval/questions.jsonl` : **20 questions** avec leur réponse attendue, leurs mots-clés obligatoires et leur source, **relues et validées par Jules avant le calcul du score**.
+- `make eval` : pose les 20 questions à l'assistant complet, calcule les scores, et enregistre tout le détail dans `eval/results/`.
+
+### Ce que mesure chaque indicateur, et pourquoi
+| Indicateur | Question posée | Pourquoi on en a besoin |
+|---|---|---|
+| **Bon passage trouvé** (top 5) | Le passage qui contient la réponse fait-il partie des 5 donnés au LLM ? | Si la recherche échoue, le LLM ne peut pas bien répondre : ça permet de savoir **où** se trouve une erreur. |
+| **Réponse juste** | La réponse contient-elle tous les faits attendus (mots-clés) ? | C'est ce que voit l'utilisateur. |
+| **Précision des citations** | Les passages cités viennent-ils de la bonne source ? | Une réponse juste mais mal citée n'est pas vérifiable. |
+| **Bonnes abstentions** | Sur les questions sans réponse, l'assistant dit-il « je ne sais pas » ? | Mesure le risque d'hallucination. |
+| **Mauvaises abstentions** | Sur les questions avec réponse, s'abstient-il à tort ? | Un assistant qui dit toujours « je ne sais pas » aurait 100 % de bonnes abstentions : il faut mesurer les deux côtés. |
+| **Temps de réponse, tokens** | Combien de temps, combien de texte traité ? | Utilisable en pratique ? Combien coûterait-il sur une offre payante ? |
+
+**Pourquoi on ne peut pas se contenter de la justesse** : une réponse peut contenir le bon chiffre par chance (de mémoire du LLM) sans être appuyée sur le bon passage, ou être juste mais citer une mauvaise source ; et la justesse seule ne dit rien des questions sans réponse.
+
+### Résultats
+| Indicateur | Résultat |
+|---|---|
+| Bon passage trouvé | 16/16 (100 %) |
+| Réponses justes | 16/16 (100 %) |
+| Précision des citations | 86 % (en réalité plus haute, voir ci-dessous) |
+| Bonnes abstentions | 4/4 (100 %) |
+| Mauvaises abstentions | 0/16 |
+| Temps de réponse médian | 5,2 s |
+
+Les citations « hors source attendue » sont en fait pertinentes : page voisine du manuel, glossaire du manuel, ou autre consigne sur le même problème (par exemple AD 2023-25-15, qui traite aussi de fixations qui tournent dans le caisson central de l'A350).
+
+### Comment interpréter un 100 %, honnêtement
+- **20 questions, c'est peu** : une question de plus ou de moins change un score de 6 points. Le chiffre montre que le système fonctionne sur des cas variés, pas qu'il ne se trompe jamais.
+- **Les questions ont été écrites en lisant les documents** : elles reprennent souvent leurs mots, ce qui est plus facile que de vraies questions de techniciens.
+- **La vérification par mots-clés est grossière** : une réponse pourrait contenir les bons mots dans une phrase fausse. Les réponses ont donc été relues une par une.
+- Pour aller plus loin : des centaines de questions, écrites par de vrais utilisateurs, et une vérification de la fidélité par un juge (humain ou LLM calibré).
+
+### Pourquoi valider les questions avant de lancer le score
+Si on regarde d'abord les résultats, on est tenté de retirer ou d'assouplir les questions ratées, et le score ne veut plus rien dire. C'est le même principe que la séparation entraînement / test en apprentissage automatique : ne pas régler son système (ou son évaluation) sur les données qui servent à le juger.
