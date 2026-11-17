@@ -38,3 +38,16 @@ retrieval:
   rerank: true
   rerank_top_n: 20      # fused candidates re-read by the cross-encoder
   reranker_model: cross-encoder/ms-marco-MiniLM-L6-v2
+
+llm:
+  # Any OpenAI-compatible endpoint. Gemini (free tier of Google AI Studio) by default.
+  base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+  # Tried in order; on overload (HTTP 429/503) the next one is used immediately.
+  # flash-lite first: on the free tier, gemini-3.8-flash was often overloaded (503 after ~7 s)
+  # or rate-limited (429), while flash-lite answered in 2-5 s with good, cited answers.
+  models: [gemini-3.1-flash-lite, gemini-3.8-flash]
+  temperature: 0.0      # (near-)deterministic, factual answers; Gemini has no seed option
+  max_tokens: 1024
+
+  timeout_s: 60
+  retries: 2

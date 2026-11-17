@@ -250,3 +250,62 @@ Le passage « Reading Drawings », 1ᵉʳ après la fusion, sort du top 5 : en l
 ### Le reranker, plus en détail
 - **Les embeddings (bi-encoder)** résument la question et chaque passage **séparément**, en un vecteur chacun, puis comparent les vecteurs. Le résumé du passage a été fait à l'avance, **sans connaître la question**. C'est rapide (les 5 295 vecteurs sont déjà calculés), mais approximatif.
 - **Le reranker (cross-encoder)** reçoit la question **et** le passage **collés ensemble** et lit les deux en même temps : chaque mot de la question est mis en relation avec chaque mot du passage. Il sort un score de pertinence (plus il est haut, plus le passage répond à la question). C'est beaucoup plus précis, mais il faut refaire ce calcul pour chaque paire au moment de la question : environ 1 s pour 20 passages, donc environ 4 à 5 minutes pour les 5 295. D'où l'organisation en entonnoir : une recherche rapide réduit à 20 candidats, et le reranker, précis mais lent, les départage.
+
+---
+
+## Étape 5 — La réponse avec citations et abstention
+
+### Ce qui a été construit
+`aerodoc ask "question"` fait tout le parcours :
+```
+question ─► (si elle est en français : traduction en anglais, pour la recherche seulement)
+         ─► recherche hybride + reranker ─► 5 passages numérotés [1] à [5]
+         ─► prompt (règles + passages + question) ─► Gemini ─► réponse avec [n]
+         ─► affichage : réponse + liste des sources citées (document, section, page, lien)
+```
+Exemples réels : `docs/EXEMPLES.md` (regénérables avec `uv run python scripts/make_examples.py`).
+
+### Le prompt, c'est quoi ?
+Le **prompt** est le texte envoyé au LLM. Il a deux parties :
+- le **message système** : les règles du jeu, identiques pour toutes les questions ;
+- le **message utilisateur** : les 5 passages numérotés, puis la question.
+
+Les règles (dans `src/aerodoc/answer.py`) :
+1. répondre **uniquement** avec les passages, jamais avec ses connaissances ;
+2. **citer** chaque affirmation avec le numéro du passage, par exemple [2] ;
+3. si l'information manque, commencer par le mot-clé `NOT_IN_DOCUMENTS` puis dire ce qui manque (c'est l'**abstention**) ; si seule une partie est couverte, répondre à cette partie et signaler le reste ;
+4. signaler quand une consigne renvoie à un autre document (par exemple une consigne EASA) ;
+5. recopier exactement les identifiants (numéros d'AD, modèles, références de pièces) ;
+6. répondre dans la langue de la question.
+
+Le programme repère ensuite les `[n]` dans la réponse pour afficher les sources correspondantes, et le mot-clé `NOT_IN_DOCUMENTS` pour afficher « je ne sais pas ».
+
+### Exemple réel, de bout en bout
+Question : « Which airplanes are affected by AD 2026-18-03 and what is the unsafe condition? »
+1. La recherche trouve 5 passages, tous de l'AD 2026-18-03.
+2. Gemini reçoit les règles, les passages et la question (1 603 tokens en entrée).
+3. Il répond (221 tokens) : les modèles A318-112, A319-115…, puis la condition dangereuse (fatigue du support de train principal, risque d'effondrement), avec les citations [4], [1], [3].
+4. Le programme affiche la réponse et les 3 sources citées, avec leur page du Federal Register et leur lien.
+
+### L'abstention, en pratique
+« What is the maximum takeoff weight of the Airbus A350-1000? » : la recherche trouve des pages du manuel sur la masse et le centrage, mais aucune ne parle de l'A350-1000. L'assistant répond « je ne sais pas » au lieu d'inventer un chiffre (qu'un LLM « connaît » peut-être, mais qui ne serait ni vérifiable ni citable).
+
+### Choix et raisons (détails dans `docs/CHOIX.md`, section 8)
+- **`gemini-3.1-flash-lite` en premier, `gemini-3.8-flash` en secours** : sur l'offre gratuite, le second était souvent saturé ou limité ; le premier répond en 1 à 5 s avec de bonnes réponses citées.
+- **Température 0** : la température règle la part de hasard dans les réponses du LLM ; à 0, il choisit toujours la formulation la plus probable, ce qu'on veut pour des réponses factuelles.
+- **Traduction des questions en français** : le modèle d'embedding et le reranker ne connaissent que l'anglais ; sans traduction, la question « Quels avions sont concernés par l'AD 2026-18-03 ? » ne trouvait pas la bonne section et l'assistant s'abstenait.
+
+### Temps de réponse (modèles déjà chargés)
+| Étape | Temps |
+|---|---|
+| Recherche par le sens | ≈ 20 ms |
+| BM25 | ≈ 1 ms |
+| Reranker | 0,7 à 0,9 s |
+| Gemini | 0,9 à 4,8 s (variable sur l'offre gratuite) |
+| **Total** | **1,6 à 5,6 s** |
+
+La toute première question après le démarrage prend environ 10 s de plus : il faut charger les modèles en mémoire. L'API (étape 7) les gardera chargés.
+
+### Limites observées
+- Pour « What are the detailed inspection steps required by EASA AD 2026-0142? », l'assistant s'abstient, ce qui est juste sur le fond (le détail n'est pas dans le corpus), mais le reranker a écarté les passages de l'AD 2026-18-03 qui citent cette consigne : l'idéal aurait été de dire « l'AD 2026-18-03 renvoie à cette consigne, dont le détail n'est pas disponible ».
+- Le reranker MiniLM est générique (questions web) : il peut écarter un bon passage dans des formulations inhabituelles.

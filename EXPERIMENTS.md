@@ -42,3 +42,20 @@ Latency: median per query, models already loaded, CPU (4 cores).
 Conclusion: default set to hybrid + MiniLM reranker (most of the gain for ~1 s).
 Caveats: 16 queries only (one query = 6 points); queries were written from the passages,
 which favours BM25 (lexical overlap).
+
+
+## 2026-11-17 — LLM availability and answer latency (step 5)
+
+Free tier of Google AI Studio, OpenAI-compatible endpoint.
+- gemini-2.5-flash: HTTP 404 (not available to new users).
+- gemini-3.8-flash: HTTP 503 (overloaded, after ~7 s) or 429 (rate limit) on most calls.
+- gemini-3.1-flash-lite: available, 1-5 s per answer.
+
+A first fallback policy (retry the overloaded model with backoff, then fall back) took up to
+85 s for one answer. Fail-fast policy (switch model immediately, back off only after a full
+round) with flash-lite first: warm end-to-end latency 1.6-5.6 s
+(dense ~20 ms, BM25 ~1 ms, rerank 0.7-0.9 s, LLM 0.9-4.8 s).
+
+French questions: without translation, "Quels avions sont concernés par l'AD 2026-18-03 ?"
+retrieved no applicability passage and the assistant abstained; with LLM translation of
+French queries for retrieval it answers correctly (in French).

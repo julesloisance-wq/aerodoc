@@ -1,4 +1,5 @@
 db:
+	./scripts/ensure-docker.sh
 	docker compose up -d --wait db adminer
 	uv run aerodoc health
 

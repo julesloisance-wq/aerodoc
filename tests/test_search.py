@@ -14,3 +14,10 @@ def test_rrf_rewards_agreement_between_rankings():
     # Chunks 1 and 3 appear in both lists, so they beat chunks found by only one retriever.
     assert set(ids[:2]) == {1, 3}
     assert fused[0][1] == 1 / 61 + 1 / 63
+
+
+def test_looks_french():
+    from aerodoc.answer import looks_french
+
+    assert looks_french("Quels avions sont concernés par l'AD 2026-18-03 ?")
+    assert not looks_french("Which airplanes are affected by AD 2026-18-03?")

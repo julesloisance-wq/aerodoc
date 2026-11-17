@@ -33,10 +33,20 @@ class RetrievalConfig(BaseModel):
     reranker_model: str = "cross-encoder/ms-marco-MiniLM-L6-v2"
 
 
+class LLMConfig(BaseModel):
+    base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    models: list[str] = ["gemini-3.1-flash-lite", "gemini-3.8-flash"]
+    temperature: float = 0.0
+    max_tokens: int = 1024
+    timeout_s: float = 60
+    retries: int = 2
+
+
 class PipelineConfig(BaseModel):
     embedding: EmbeddingConfig
     chunking: ChunkingConfig = ChunkingConfig()
     retrieval: RetrievalConfig = RetrievalConfig()
+    llm: LLMConfig = LLMConfig()
 
 
 def load_config(path: Path = DEFAULT_CONFIG) -> PipelineConfig:

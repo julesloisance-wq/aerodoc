@@ -110,6 +110,24 @@ def explore(
 
 
 @app.command()
+def ask(
+    question: str,
+    config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
+    show_passages: bool = typer.Option(False, help="Also print the retrieved passages."),
+) -> None:
+    """Answer a question from the documents, with citations (or abstain)."""
+    from aerodoc.answer import answer_question, render_answer
+    from aerodoc.pipeline_config import load_config
+
+    with db.connect() as conn:
+        ans = answer_question(conn, question, load_config(config))
+    typer.echo(render_answer(ans))
+    if show_passages:
+        for i, hit in enumerate(ans.passages, 1):
+            typer.echo(f"\n[{i}] {hit.citation}\n{hit.text}")
+
+
+@app.command()
 def version() -> None:
     """Print the AeroDoc version."""
     from aerodoc import __version__
