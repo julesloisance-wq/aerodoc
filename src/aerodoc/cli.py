@@ -55,15 +55,39 @@ def search(
     config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
     full: bool = typer.Option(False, help="Print whole passages."),
 ) -> None:
-    """Show the passages closest to a question (no LLM involved)."""
+    """Show the passages retrieved for a question (no LLM involved)."""
     from aerodoc.pipeline_config import load_config
-    from aerodoc.search import dense_search
+    from aerodoc.search import retrieve
 
     with db.connect() as conn:
-        hits = dense_search(conn, question, load_config(config), k)
-    for rank, hit in enumerate(hits, 1):
+        result = retrieve(conn, question, load_config(config), k)
+    for rank, hit in enumerate(result.hits, 1):
         text = hit.text if full else hit.text[:300] + "..."
-        typer.echo(f"\n#{rank}  score {hit.score:.3f}  [{hit.citation}]\n    {text}")
+        origin = ", ".join(f"{name} #{r}" for name, r in hit.ranks.items()) or "-"
+        typer.echo(
+            f"\n#{rank}  score {hit.score:.3f}  [{hit.citation}]  (found by: {origin})\n    {text}"
+        )
+    timings = ", ".join(f"{name} {ms:.0f} ms" for name, ms in result.timings_ms.items())
+    typer.echo(f"\nTimings: {timings}")
+
+
+@app.command()
+def probe(
+    config: Path = typer.Option(Path("configs/default.yaml"), help="Base pipeline config."),
+) -> None:
+    """Compare retrieval variants on the 16-query probe set."""
+    from aerodoc.pipeline_config import load_config
+    from aerodoc.probe import run_probe
+
+    with db.connect() as conn:
+        results = run_probe(conn, load_config(config))
+    for row in results:
+        ranks = row.pop("ranks")
+        typer.echo(row["variant"])
+        for key, value in row.items():
+            if key != "variant":
+                typer.echo(f"    {key}: {value:.2f}")
+        typer.echo(f"    rank of first relevant chunk: {ranks}")
 
 
 @app.command()

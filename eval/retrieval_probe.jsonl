@@ -1,0 +1,16 @@
+{"id": "id-1", "kind": "ad_number", "query": "AD 2025-07-05", "document_id_ad": "2025-07-05"}
+{"id": "id-2", "kind": "ad_number", "query": "What does AD 2023-17-01 require?", "document_id_ad": "2023-17-01"}
+{"id": "id-3", "kind": "ad_number", "query": "Which airplanes are affected by AD 2025-13-12?", "document_id_ad": "2025-13-12"}
+{"id": "id-4", "kind": "ad_number", "query": "AD 2024-14-10 compliance", "document_id_ad": "2024-14-10"}
+{"id": "ad-1", "kind": "ad_topic", "query": "risk of cracking on the A350 forward cargo door piano hinges", "document_id_ad": "2025-07-05"}
+{"id": "ad-2", "kind": "ad_topic", "query": "washers installed upside down on main landing gear door hinges", "document_id_ad": "2023-22-09"}
+{"id": "ad-3", "kind": "ad_topic", "query": "ATR 72 nose landing gear drag brace panel quality problem", "document_id_ad": "2023-17-01"}
+{"id": "ad-4", "kind": "ad_topic", "query": "A320 high pressure bleed valve butterfly seal clip rupture", "document_id_ad": "2026-15-13"}
+{"id": "ad-5", "kind": "ad_topic", "query": "hydraulic fluid contaminating an electronic card of the flight control remote module", "document_id_ad": "2025-13-12"}
+{"id": "ad-6", "kind": "ad_topic", "query": "galley waste compartment door opened during a 9G forward test", "document_id_ad": "2023-20-12"}
+{"id": "hb-1", "kind": "handbook", "query": "How does a moving iron vane meter work?", "pages": ["12-74"]}
+{"id": "hb-2", "kind": "handbook", "query": "How are fires classified?", "pages": ["1-5"]}
+{"id": "hb-3", "kind": "handbook", "query": "What does a Barcol hardness number indicate?", "pages": ["7-27"]}
+{"id": "hb-4", "kind": "handbook", "query": "What should you do if oil pressure does not show after starting a turboprop engine?", "pages": ["1-14"]}
+{"id": "hb-5", "kind": "handbook", "query": "How is a plumb bob used when weighing an aircraft?", "pages": ["6-12"]}
+{"id": "hb-6", "kind": "handbook", "query": "What do the strain-hardening designations H1, H2 and H3 mean?", "pages": ["7-8"]}

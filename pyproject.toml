@@ -5,6 +5,7 @@ description = "Retrieval-augmented assistant over FAA airworthiness directives a
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "bm25s>=0.3.16",
     "httpx>=0.28.1",
     "pgvector>=0.5.1",
     "psycopg[binary]>=3.3.9",

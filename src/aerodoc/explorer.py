@@ -8,7 +8,7 @@ from pathlib import Path
 import psycopg
 
 from aerodoc.pipeline_config import PipelineConfig
-from aerodoc.search import dense_search
+from aerodoc.search import retrieve
 
 STYLE = """
 :root { --bg:#fff; --fg:#1d1d1f; --muted:#6e6e73; --card:#f5f5f7; --accent:#0b63ce;
@@ -107,13 +107,15 @@ def build_explorer(
             f"<p>{_e(text)}</p></details>"
         )
 
-    out.append("<h2>4. Semantic search: top 5 chunks per question</h2>")
+    out.append("<h2>4. Retrieval (hybrid + reranker): top 5 chunks per question</h2>")
     for question in questions:
         out.append(f"<h3>“{_e(question)}”</h3>")
-        for rank, hit in enumerate(dense_search(conn, question, cfg, 5), 1):
+        for rank, hit in enumerate(retrieve(conn, question, cfg, 5).hits, 1):
+            found_by = ", ".join(f"{name} #{r}" for name, r in hit.ranks.items())
             out.append(
                 f"<div class='card'><span class='score'>#{rank} · score "
-                f"{hit.score:.3f}</span> <span class='meta'>{_e(hit.citation)}</span>"
+                f"{hit.score:.3f}</span> <span class='meta'>{_e(hit.citation)} · "
+                f"found by {_e(found_by)}</span>"
                 f"<p>{_e(hit.text[:450])}…</p></div>"
             )
     out.append("</body></html>")

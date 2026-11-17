@@ -2,6 +2,8 @@
 
 Ce document explique le système à Jules, étape par étape, sans supposer de connaissances préalables. Il grandit à chaque étape du plan.
 
+**La justification détaillée de chaque choix (options, raisons, limites, formulation pour l'entretien) est dans [`docs/CHOIX.md`](CHOIX.md).**
+
 ---
 
 ## Le projet en une phrase
@@ -166,3 +168,43 @@ Manuel (.pdf)     ──► pages (+ numéro imprimé, chapitre) ──► passa
                                             PostgreSQL : table chunks (texte, page, section,
                                                          vecteur + index HNSW, plein texte)
 ```
+
+---
+
+## Étape 4 — Une recherche efficace (hybride + reranker)
+
+### Ce qui a été construit
+La recherche se fait désormais en 4 temps :
+```
+question ─┬─► recherche par le sens (embeddings) ─► 30 meilleurs ─┐
+          └─► recherche par mots-clés (BM25)     ─► 30 meilleurs ─┤
+                                                                  ▼
+                                  fusion des deux classements (RRF) ─► 20 meilleurs
+                                                                  ▼
+                            reranker : relit chaque paire (question, passage) ─► 5 meilleurs ─► LLM
+```
+- `aerodoc search "question"` affiche les 5 passages retenus, et **par quelle méthode chacun a été trouvé** (par exemple « dense #8, bm25 #1 »).
+- `aerodoc probe` compare les configurations sur 16 questions de test (`eval/retrieval_probe.jsonl`).
+
+### Les trois briques, simplement
+- **BM25** : un moteur de recherche par mots-clés. Un passage marque des points pour chaque mot de la question qu'il contient, d'autant plus que ce mot est **rare** dans l'ensemble des documents. « 2026-18-03 » est rare, donc décisif ; « airplane » est partout, donc il compte peu.
+- **RRF (Reciprocal Rank Fusion)** : pour fusionner deux classements, chaque passage reçoit 1/(60 + son rang) dans chaque liste, et on additionne. Un passage bien classé par les deux méthodes l'emporte. On n'utilise que les rangs, parce que les scores des deux méthodes ne sont pas sur la même échelle.
+- **Reranker (cross-encoder)** : un petit modèle qui lit la question **et** le passage **ensemble** et note leur pertinence. Plus précis que la comparaison de vecteurs calculés séparément, mais plus lent : on ne l'applique qu'aux 20 meilleurs candidats.
+
+### Exemple réel
+« AD 2026-18-03 » :
+- **avant** (recherche par le sens seule) : la bonne consigne en 3ᵉ position, derrière deux autres consignes ;
+- **après** : les 5 passages retenus viennent tous de l'AD 2026-18-03, trouvés par BM25 puis réordonnés par le reranker.
+
+« landing gear inspection » : la recherche par le sens apporte les pages du chapitre 10 du manuel (Inspection) que BM25 classait loin. Les deux méthodes se complètent.
+
+### Les chiffres (16 questions de test)
+| Configuration | 1ʳᵉ position | Top 5 | MRR | Latence |
+|---|---|---|---|---|
+| Sens seul | 75 % | 81 % | 0,78 | 20 ms |
+| BM25 seul | 88 % | 100 % | 0,92 | 1 ms |
+| Hybride | 75 % | 100 % | 0,85 | 17 ms |
+| **Hybride + reranker MiniLM (retenu)** | **88 %** | **100 %** | **0,94** | **≈ 1 s** |
+| Hybride + reranker bge-base | 94 % | 100 % | 0,97 | ≈ 4,9 s |
+
+Le détail des raisons et des limites est dans `docs/CHOIX.md`, section 6.

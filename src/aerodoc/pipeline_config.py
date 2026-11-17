@@ -1,6 +1,7 @@
 """Typed loader for the versioned YAML configuration (`configs/*.yaml`)."""
 
 from pathlib import Path
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel
@@ -24,6 +25,12 @@ class ChunkingConfig(BaseModel):
 
 class RetrievalConfig(BaseModel):
     top_k: int = 5
+    mode: Literal["dense", "bm25", "hybrid"] = "hybrid"
+    candidates: int = 30  # chunks taken from each retriever before fusion
+    rrf_k: int = 60
+    rerank: bool = True
+    rerank_top_n: int = 20  # fused candidates re-scored by the cross-encoder
+    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L6-v2"
 
 
 class PipelineConfig(BaseModel):
