@@ -208,3 +208,45 @@ question ─┬─► recherche par le sens (embeddings) ─► 30 meilleurs ─
 | Hybride + reranker bge-base | 94 % | 100 % | 0,97 | ≈ 4,9 s |
 
 Le détail des raisons et des limites est dans `docs/CHOIX.md`, section 6.
+
+### La recherche pas à pas, sur un exemple réel : « landing gear inspection »
+
+**1. Deux listes séparées (30 passages chacune).**
+| Rang | Recherche par le sens (score cosinus) | BM25 (score mots-clés) |
+|---|---|---|
+| #1 | Manuel, ch. 10, Special Inspections (0,806) | AD 2025-11-08, (e) Unsafe Condition (5,29) |
+| #2 | Manuel, ch. 10, Checklists (0,794) | Manuel, ch. 14, Human Factors… (5,17) ← hors sujet |
+| #3 | Manuel, ch. 4, Reading Drawings (0,780) | Manuel, ch. 6, Weight & Balance (4,79) ← hors sujet |
+
+Chaque méthode a ses erreurs : BM25 remonte des pages qui contiennent juste les mots « landing » ou « gear » dans un autre contexte.
+
+**2. La fusion (RRF).** Les deux listes réunies donnent **45 passages différents** (15 sont dans les deux). Chacun reçoit 1/(60 + rang) pour chaque liste où il apparaît :
+- AD 2025-11-08 : 8ᵉ en sens, 1ᵉʳ en BM25 → 1/68 + 1/61 = **0,0311** ;
+- Manuel, Reading Drawings : 3ᵉ en sens, 5ᵉ en BM25 → 1/63 + 1/65 = **0,0313** ;
+- un passage présent dans une seule liste n'a qu'un des deux termes, donc un score plus faible.
+
+On trie les 45 par ce score et on garde les **20 premiers** : ce sont « les 20 meilleurs en sortie de RRF ».
+
+**3. Le reranker relit ces 20 passages avec la question** et les reclasse :
+| Classement final | Score reranker | Rang après RRF |
+|---|---|---|
+| #1 AD 2025-11-08, (e) Unsafe Condition | 5,77 | 2ᵉ |
+| #2 Manuel, ch. 10, Checklists | 4,64 | 8ᵉ |
+| #3 Manuel, ch. 10, Special Inspections | 4,33 | **16ᵉ** |
+| #4 AD 2023-23-11, (e) Reason | 4,07 | 5ᵉ |
+| #5 Manuel, ch. 10, Severe Turbulence Inspection | 4,02 | 13ᵉ |
+
+Le passage « Reading Drawings », 1ᵉʳ après la fusion, sort du top 5 : en lisant la question et le passage ensemble, le reranker voit qu'il parle de lire des plans, pas d'inspection. À l'inverse, « Special Inspections », 16ᵉ, remonte en 3ᵉ position.
+
+**Lire « dense #8, bm25 #1 »** : avant la fusion, ce passage était 8ᵉ dans la liste de la recherche par le sens et 1ᵉʳ dans celle de BM25. S'il n'y a qu'une méthode, par exemple « dense #1 », le passage n'était pas dans les 30 premiers de l'autre.
+
+### L'index HNSW
+**Le problème.** Trouver les vecteurs les plus proches de la question parmi 5 295. La méthode naïve compare la question à chacun.
+
+**L'idée (*Hierarchical Navigable Small World*).** À l'indexation, chaque vecteur est relié à quelques voisins proches, ce qui forme un réseau. On ajoute des étages : en haut, peu de points reliés par de longues liaisons, comme des autoroutes ; en bas, tous les points reliés à leurs proches voisins, comme des rues. Pour chercher, on part du haut, on saute à chaque fois vers le voisin le plus proche de la question, puis on descend d'étage, jusqu'à arriver dans le bon quartier. On examine ainsi quelques centaines de vecteurs au lieu de tous.
+
+**Le compromis.** C'est une recherche **approximative** : très rarement, elle peut manquer le vrai plus proche voisin, en échange d'une énorme accélération. À 5 295 passages, la comparaison exhaustive serait aussi très rapide. HNSW devient indispensable à partir de centaines de milliers de vecteurs, et c'est l'index standard de pgvector.
+
+### Le reranker, plus en détail
+- **Les embeddings (bi-encoder)** résument la question et chaque passage **séparément**, en un vecteur chacun, puis comparent les vecteurs. Le résumé du passage a été fait à l'avance, **sans connaître la question**. C'est rapide (les 5 295 vecteurs sont déjà calculés), mais approximatif.
+- **Le reranker (cross-encoder)** reçoit la question **et** le passage **collés ensemble** et lit les deux en même temps : chaque mot de la question est mis en relation avec chaque mot du passage. Il sort un score de pertinence (plus il est haut, plus le passage répond à la question). C'est beaucoup plus précis, mais il faut refaire ce calcul pour chaque paire au moment de la question : environ 1 s pour 20 passages, donc environ 4 à 5 minutes pour les 5 295. D'où l'organisation en entonnoir : une recherche rapide réduit à 20 candidats, et le reranker, précis mais lent, les départage.
