@@ -119,3 +119,50 @@ Le texte contient aussi des repères de page du Federal Register, comme `[[Page 
 
 ### Voir la base de données (Adminer)
 Adminer est une page web qui affiche la base comme un tableur : http://localhost:8080. Connexion : système **PostgreSQL**, serveur **db**, utilisateur / mot de passe / base **aerodoc**. Ouvrir la table `documents`, puis « Afficher les données ».
+
+---
+
+## Étape 3 — Découpage et indexation
+
+### Ce qui a été construit
+`make index` transforme les 226 documents en **5 295 passages (chunks)** rangés dans la table `chunks` : 3 478 pour les consignes, 1 817 pour le manuel. Pour chaque passage, la base stocke :
+- le texte ;
+- un **en-tête** (numéro d'AD, avions, date d'effet, section) ;
+- la page (page du Federal Register, ou numéro imprimé du manuel comme `10-13`) ;
+- la section ;
+- son **vecteur** (384 nombres) ;
+- un index « plein texte » qui servira à la recherche par mots-clés à l'étape 4.
+
+`aerodoc search "question"` affiche les 5 passages les plus proches, sans LLM. `aerodoc explore` produit une page web (`data/explorer.html`) qui montre tout cela.
+
+### Que se passe-t-il quand on cherche « landing gear inspection » ?
+1. La question est transformée en vecteur par le même modèle d'embedding que les passages (avec une courte consigne devant, recommandée par ce modèle pour les questions).
+2. PostgreSQL compare ce vecteur aux 5 295 vecteurs des passages avec la **similarité cosinus**, qui mesure à quel point deux vecteurs pointent dans la même direction (1 = identiques, 0 = sans rapport). Un index **HNSW**, une sorte de « carte routière » entre vecteurs voisins, évite de tout comparer un par un.
+3. On garde les 5 meilleurs. Résultat réel : 4 passages du chapitre 10 du manuel (« Inspection Concepts & Techniques », page 10-13 en tête, score 0,81), puis une consigne.
+
+### Pourquoi la recherche par le sens rate un numéro de consigne exact
+Résultat réel pour « AD 2026-18-03 » : la bonne consigne n'arrive qu'en **3ᵉ position** (score 0,744), derrière AD 2026-09-03 (0,751) et AD 2025-23-04 (0,745). Les scores sont presque identiques.
+
+La raison : le modèle d'embedding encode le **sens**, pas les caractères exacts. Pour lui, « 2026-18-03 » et « 2026-09-03 » sont deux « numéros de consigne » quasi équivalents. Une recherche par **mots-clés** (étape 4) trouve en revanche la chaîne exacte « 2026-18-03 » sans hésiter. C'est tout l'intérêt de combiner les deux.
+
+### Choix et raisons
+| Choix | Pourquoi |
+|---|---|
+| **Modèle `BAAI/bge-small-en-v1.5`** (384 dimensions) | Mesuré ici : 9,6 passages/s contre 2,7 pour `bge-base`, donc 7 min d'indexation au lieu d'environ 25. La qualité perdue est récupérée par la recherche hybride et le reranker. Gratuit, tourne sur CPU, documents en anglais. |
+| **Passages d'environ 250 mots, chevauchement de 40 mots** | Assez petits pour être précis et citables, assez grands pour garder le contexte. Sous la limite de 512 tokens du modèle, en-tête compris. Le chevauchement évite de couper une idée en deux sans trace. |
+| **Coupure aux changements de section** (si le passage a déjà 80 mots) | Un passage parle d'un seul sujet ; les petites sections, comme « (d) Subject », sont regroupées avec leurs voisines. |
+| **En-tête ajouté à chaque passage** | Un passage qui dit seulement « appliquez l'EASA AD 2026-0142 » sait quand même qu'il appartient à l'AD 2026-18-03, sur A320, section (g). |
+| **Sections administratives ignorées** (adresses, Paperwork Reduction Act…) | Elles ne répondent à aucune question de maintenance et pollueraient les résultats. |
+| **Manuel découpé page par page, section tirée de la table des matières du PDF** | Permet de citer « chapitre 10, section Special Inspections, page 10-13 ». |
+| **PyTorch version CPU** | Environ 3 Go de moins que la version prévue pour les cartes graphiques, dont on n'a pas besoin. |
+
+### Schéma
+```
+Fichier AD (.txt) ──► paragraphes (+ page, section) ──► passages de ~250 mots ─┐
+Manuel (.pdf)     ──► pages (+ numéro imprimé, chapitre) ──► passages ─────────┤
+                                                                               ▼
+                                            en-tête + texte ──► bge-small ──► vecteur (384)
+                                                                               ▼
+                                            PostgreSQL : table chunks (texte, page, section,
+                                                         vecteur + index HNSW, plein texte)
+```
