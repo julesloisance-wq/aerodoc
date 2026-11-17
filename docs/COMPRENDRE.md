@@ -290,7 +290,7 @@ Question : « Which airplanes are affected by AD 2026-18-03 and what is the unsa
 ### L'abstention, en pratique
 « What is the maximum takeoff weight of the Airbus A350-1000? » : la recherche trouve des pages du manuel sur la masse et le centrage, mais aucune ne parle de l'A350-1000. L'assistant répond « je ne sais pas » au lieu d'inventer un chiffre (qu'un LLM « connaît » peut-être, mais qui ne serait ni vérifiable ni citable).
 
-### Choix et raisons (détails dans `docs/CHOIX.md`, section 8)
+### Choix et raisons (détails dans `docs/CHOIX.md`, section 7)
 - **`gemini-3.1-flash-lite` en premier, `gemini-3.8-flash` en secours** : sur l'offre gratuite, le second était souvent saturé ou limité ; le premier répond en 1 à 5 s avec de bonnes réponses citées.
 - **Température 0** : la température règle la part de hasard dans les réponses du LLM ; à 0, il choisit toujours la formulation la plus probable, ce qu'on veut pour des réponses factuelles.
 - **Traduction des questions en français** : le modèle d'embedding et le reranker ne connaissent que l'anglais ; sans traduction, la question « Quels avions sont concernés par l'AD 2026-18-03 ? » ne trouvait pas la bonne section et l'assistant s'abstenait.

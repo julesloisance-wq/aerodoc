@@ -255,9 +255,9 @@ Le **MRR** (*Mean Reciprocal Rank*) vaut 1 si la bonne réponse est toujours 1ʳ
 
 ---
 
-## 8. La génération de la réponse
+## 7. La génération de la réponse
 
-### 8.1 Un prompt à règles strictes
+### 7.1 Un prompt à règles strictes
 **Le problème.** Empêcher le LLM d'inventer, et rendre chaque affirmation vérifiable.
 
 **Le choix et pourquoi.** Le message système impose de répondre **uniquement** avec les passages, de **citer** chaque affirmation par le numéro du passage, et de **s'abstenir** quand l'information manque. Les passages sont numérotés [1] à [5] avec leur référence (document, section, page). Le programme retrouve ensuite les numéros cités pour afficher les sources.
@@ -266,15 +266,15 @@ Le **MRR** (*Mean Reciprocal Rank*) vaut 1 si la bonne réponse est toujours 1ʳ
 
 **En entretien.** « Le prompt impose trois choses : répondre seulement à partir des passages, citer chaque affirmation, et dire "je ne sais pas" si l'information manque. Les passages sont numérotés avec leur référence, ce qui permet d'afficher des citations cliquables. »
 
-### 8.2 Un mot-clé d'abstention (`NOT_IN_DOCUMENTS`)
+### 7.2 Un mot-clé d'abstention (`NOT_IN_DOCUMENTS`)
 **Pourquoi.** Si le LLM écrit simplement « I don't know » à sa façon, le programme ne peut pas le détecter de manière fiable. Un mot-clé imposé en première ligne permet de savoir **automatiquement** que l'assistant s'est abstenu : on peut l'afficher clairement et le compter dans le test de qualité.
 
-### 8.3 Pourquoi s'abstenir plutôt que répondre de mémoire
+### 7.3 Pourquoi s'abstenir plutôt que répondre de mémoire
 Pour « Quelle est la masse maximale au décollage de l'A350-1000 ? », le LLM connaît peut-être la réponse. Mais elle n'est ni dans nos documents, ni vérifiable, ni citable. Dans la maintenance aéronautique, une réponse non sourcée est plus dangereuse qu'une absence de réponse.
 
 **En entretien.** « Je préfère qu'il dise "je ne sais pas" plutôt que de donner un chiffre non vérifiable : dans un contexte réglementé, une erreur confiante coûte plus cher qu'une abstention. »
 
-### 8.4 `gemini-3.1-flash-lite` en premier, `gemini-3.8-flash` en secours
+### 7.4 `gemini-3.1-flash-lite` en premier, `gemini-3.8-flash` en secours
 **Mesuré.**
 - `gemini-2.5-flash` n'est plus proposé aux nouveaux comptes (erreur 404).
 - `gemini-3.8-flash`, sur l'offre gratuite, était soit saturé (erreur 503 au bout d'environ 7 s), soit limité (erreur 429).
@@ -284,24 +284,24 @@ Pour « Quelle est la masse maximale au décollage de l'A350-1000 ? », le LLM c
 
 **Les limites.** Un modèle « lite » raisonne moins bien sur des questions complexes. Avec une offre payante, on mettrait `gemini-3.8-flash` en premier, en changeant une ligne de `configs/default.yaml`.
 
-### 8.5 Température 0
+### 7.5 Température 0
 La **température** règle la part de hasard dans le choix des mots du LLM. À 0, il prend toujours la formulation la plus probable : des réponses factuelles et (presque) reproductibles. Gemini n'accepte pas de graine de hasard (`seed`), donc une reproductibilité parfaite n'est pas garantie.
 
-### 8.6 Traduire en anglais les questions posées en français, pour la recherche seulement
+### 7.6 Traduire en anglais les questions posées en français, pour la recherche seulement
 **Mesuré.** « Quels avions sont concernés par l'AD 2026-18-03 ? » : sans traduction, la recherche ne trouvait pas la section « Applicability », car le modèle d'embedding et le reranker ne connaissent que l'anglais. L'assistant s'abstenait. Avec traduction, il répond correctement, en français.
 
 **Le choix.** Si la question contient au moins deux mots français courants, le LLM la traduit en anglais (en gardant les identifiants intacts). La recherche utilise la traduction, mais la réponse est rédigée dans la langue de la question.
 
 **Les limites.** Un appel au LLM en plus (environ 1 s). La détection ne couvre que le français. Une alternative aurait été un modèle d'embedding multilingue, plus lourd.
 
-### 8.7 5 passages envoyés au LLM
+### 7.7 5 passages envoyés au LLM
 Environ 1 200 à 2 200 tokens en entrée : assez pour couvrir une réponse qui demande plusieurs passages, assez peu pour rester rapide et ne pas noyer le LLM dans du texte inutile.
 
 ---
 
-## 7. Méthode de travail
+## 8. Méthode de travail
 
-### 7.1 Une évaluation légère plutôt qu'un protocole de recherche
+### 8.1 Une évaluation légère plutôt qu'un protocole de recherche
 **Le choix et pourquoi.** La priorité était un système qui marche et qu'on comprend, en deux jours. On mesure donc simplement :
 - une petite série de questions pour choisir la recherche (16 questions) ;
 - une vingtaine de questions pour le score final (étape 6).
@@ -310,10 +310,10 @@ C'est suffisant pour justifier les choix et donner un chiffre crédible.
 
 **Les limites.** Avec si peu de questions, les écarts de quelques points ne sont pas significatifs. En production, il faudrait des centaines de questions, idéalement posées par de vrais techniciens.
 
-### 7.2 Configuration versionnée, mesures notées
+### 8.2 Configuration versionnée, mesures notées
 Tous les paramètres sont dans `configs/default.yaml`, versionné dans Git. Chaque mesure est notée dans `EXPERIMENTS.md`. On peut donc toujours dire quelle configuration a produit quel résultat.
 
-### 7.3 Le rôle de l'IA dans le projet
+### 8.3 Le rôle de l'IA dans le projet
 Le code a été écrit par un assistant de code IA (Claude Code). Le rôle de Jules :
 - concevoir le système et définir les priorités (simplicité, rapidité, compréhension) ;
 - valider chaque choix technique à partir des mesures ;
