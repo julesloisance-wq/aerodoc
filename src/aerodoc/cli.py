@@ -127,6 +127,40 @@ def ask(
             typer.echo(f"\n[{i}] {hit.citation}\n{hit.text}")
 
 
+@app.command(name="eval")
+def evaluate(
+    config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
+) -> None:
+    """Run the quality test on eval/questions.jsonl and save the results."""
+    from aerodoc.evaluate import run_eval
+    from aerodoc.pipeline_config import load_config
+
+    with db.connect() as conn:
+        result = run_eval(conn, load_config(config), str(config))
+    s = result["summary"]
+    typer.echo(f"\nQuality test ({s['questions']} questions, config {config})")
+    typer.echo(f"  Right passage retrieved (top 5)  {s['retrieval_hit@5']:.0%}")
+    typer.echo(f"  Correct answers                  {s['answer_correct']:.0%}")
+    for kind, value in s["answer_correct_by_type"].items():
+        typer.echo(f"      {kind:<22}         {value:.0%}")
+    typer.echo(f"  Citation precision               {s['citation_precision']:.0%}")
+    typer.echo(f"  Correct abstentions              {s['correct_abstention']:.0%}")
+    typer.echo(f"  Wrong abstentions                {s['false_abstention']:.0%}")
+    typer.echo(
+        f"  Latency median / max            {s['median_latency_s']:.1f} s / "
+        f"{s['max_latency_s']:.1f} s"
+    )
+    typer.echo(f"  Tokens per question (mean)       {s['mean_tokens']:.0f}")
+    for row in result["rows"]:
+        ok = row.get("correct", row.get("correct_abstention"))
+        if not ok:
+            typer.echo(f"\n  FAILED {row['id']} ({row['type']}): {row['question']}")
+            typer.echo(f"    answer: {row['answer'][:300]}")
+            if row.get("missing_facts"):
+                typer.echo(f"    missing: {row['missing_facts']}")
+    typer.echo(f"\nDetails: {result['path']}")
+
+
 @app.command()
 def version() -> None:
     """Print the AeroDoc version."""

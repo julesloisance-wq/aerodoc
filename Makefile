@@ -20,4 +20,7 @@ data:
 index:
 	uv run aerodoc index
 
-.PHONY: db db-down data index test lint
+eval:
+	uv run aerodoc eval
+
+.PHONY: db db-down data index eval test lint
