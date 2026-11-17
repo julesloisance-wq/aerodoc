@@ -21,6 +21,6 @@ index:
 	uv run aerodoc index
 
 eval:
-	uv run aerodoc eval
+	uv run aerodoc eval --config $(or $(CONFIG),configs/default.yaml) --questions $(or $(QUESTIONS),eval/questions/dev.jsonl)
 
 .PHONY: db db-down data index eval test lint

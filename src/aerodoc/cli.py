@@ -130,27 +130,21 @@ def ask(
 @app.command(name="eval")
 def evaluate(
     config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
+    questions: Path = typer.Option(
+        Path("eval/questions/dev.jsonl"), help="Question file (dev, test or smoke)."
+    ),
+    system: str = typer.Option("rag", help="rag, or closed_book (LLM without documents)."),
 ) -> None:
-    """Run the quality test on eval/questions.jsonl and save the results."""
+    """Run the quality test and save the results in eval/results/."""
     from aerodoc.evaluate import run_eval
     from aerodoc.pipeline_config import load_config
 
+    if questions.name == "test.jsonl":
+        typer.echo("Running on the TEST set: use it once, for the final measurement only.")
     with db.connect() as conn:
-        result = run_eval(conn, load_config(config), str(config))
-    s = result["summary"]
-    typer.echo(f"\nQuality test ({s['questions']} questions, config {config})")
-    typer.echo(f"  Right passage retrieved (top 5)  {s['retrieval_hit@5']:.0%}")
-    typer.echo(f"  Correct answers                  {s['answer_correct']:.0%}")
-    for kind, value in s["answer_correct_by_type"].items():
-        typer.echo(f"      {kind:<22}         {value:.0%}")
-    typer.echo(f"  Citation precision               {s['citation_precision']:.0%}")
-    typer.echo(f"  Correct abstentions              {s['correct_abstention']:.0%}")
-    typer.echo(f"  Wrong abstentions                {s['false_abstention']:.0%}")
-    typer.echo(
-        f"  Latency median / max            {s['median_latency_s']:.1f} s / "
-        f"{s['max_latency_s']:.1f} s"
-    )
-    typer.echo(f"  Tokens per question (mean)       {s['mean_tokens']:.0f}")
+        result = run_eval(conn, load_config(config), str(config), questions, system)
+    typer.echo(f"\n{system} on {questions} ({result['summary']['questions']} questions)")
+    typer.echo(format_summary(result["summary"]))
     for row in result["rows"]:
         ok = row.get("correct", row.get("correct_abstention"))
         if not ok:
@@ -159,6 +153,31 @@ def evaluate(
             if row.get("missing_facts"):
                 typer.echo(f"    missing: {row['missing_facts']}")
     typer.echo(f"\nDetails: {result['path']}")
+
+
+def format_summary(s: dict) -> str:
+    def fmt(metric: dict | None) -> str:
+        if not metric:
+            return "n/a"
+        low, high = metric["ci95"]
+        return f"{metric['rate']:.0%} ({metric['k']}/{metric['n']}, 95% CI {low:.0%}-{high:.0%})"
+
+    lines = [
+        f"  Right passage retrieved (top 5)   {fmt(s['retrieval_hit@5'])}",
+        f"  Correct answers                   {fmt(s['answer_correct'])}",
+    ]
+    lines += [f"      {k:<26}  {fmt(v)}" for k, v in s["answer_correct_by_type"].items()]
+    lines += [
+        f"  Correct abstentions               {fmt(s['correct_abstention'])}",
+        f"  Made-up answers (unanswerable)    {fmt(s['hallucination_on_unanswerable'])}",
+        f"  Wrong abstentions                 {fmt(s['false_abstention'])}",
+        "  Citation precision                "
+        + (f"{s['citation_precision']:.0%}" if s["citation_precision"] is not None else "n/a"),
+        f"  Latency median / max              {s['median_latency_s']:.1f} s / "
+        f"{s['max_latency_s']:.1f} s",
+        f"  Tokens per question (mean)        {s['mean_tokens']:.0f}",
+    ]
+    return "\n".join(lines)
 
 
 @app.command()
