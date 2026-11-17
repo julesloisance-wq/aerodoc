@@ -1,0 +1,39 @@
+[project]
+name = "aerodoc"
+version = "0.1.0"
+description = "Retrieval-augmented assistant over FAA airworthiness directives and maintenance handbooks, with cited answers."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pgvector>=0.5.1",
+    "psycopg[binary]>=3.3.9",
+    "pydantic-settings>=2.16.3",
+    "typer>=0.29.1",
+]
+
+[project.scripts]
+aerodoc = "aerodoc.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aerodoc"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: needs the PostgreSQL container (make db)"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.5",
+]
