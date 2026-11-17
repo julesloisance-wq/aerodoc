@@ -11,6 +11,8 @@ dependencies = [
     "pydantic-settings>=2.16.3",
     "pymupdf>=2.1",
     "pyyaml>=6.0.3",
+    "sentence-transformers>=6.3.0",
+    "torch>=2.15.0",
     "typer>=0.29.1",
 ]
 
@@ -43,3 +45,20 @@ dev = [
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
+[tool.uv]
+# Lock only for the platforms we run on (Linux servers/containers, macOS laptops).
+environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'linux' and platform_machine == 'aarch64'",
+    "sys_platform == 'darwin'",
+]
+
+# CPU-only PyTorch: much smaller than the default CUDA build, enough for embeddings.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

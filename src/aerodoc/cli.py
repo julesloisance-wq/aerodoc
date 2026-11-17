@@ -35,6 +35,57 @@ def data(
 
 
 @app.command()
+def index(
+    config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
+    data_dir: Path = typer.Option(Path("data"), help="Corpus directory."),
+) -> None:
+    """Chunk the corpus, embed every chunk and store everything in PostgreSQL."""
+    from aerodoc.index import build_index
+    from aerodoc.pipeline_config import load_config
+
+    with db.connect() as conn:
+        n = build_index(conn, load_config(config), data_dir)
+    typer.echo(f"Indexed {n} chunks.")
+
+
+@app.command()
+def search(
+    question: str,
+    k: int = typer.Option(5, "-k", help="Number of passages to show."),
+    config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
+    full: bool = typer.Option(False, help="Print whole passages."),
+) -> None:
+    """Show the passages closest to a question (no LLM involved)."""
+    from aerodoc.pipeline_config import load_config
+    from aerodoc.search import dense_search
+
+    with db.connect() as conn:
+        hits = dense_search(conn, question, load_config(config), k)
+    for rank, hit in enumerate(hits, 1):
+        text = hit.text if full else hit.text[:300] + "..."
+        typer.echo(f"\n#{rank}  score {hit.score:.3f}  [{hit.citation}]\n    {text}")
+
+
+@app.command()
+def explore(
+    out: Path = typer.Option(Path("data/explorer.html"), help="Output HTML file."),
+    config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
+) -> None:
+    """Write a static HTML page showing the corpus, chunks and example searches."""
+    from aerodoc.explorer import write_explorer
+    from aerodoc.pipeline_config import load_config
+
+    questions = [
+        "landing gear inspection",
+        "AD 2026-18-03",
+        "How do you inspect a fire extinguisher?",
+    ]
+    with db.connect() as conn:
+        path = write_explorer(conn, load_config(config), questions, "FR-2026-18052", out)
+    typer.echo(f"Wrote {path}")
+
+
+@app.command()
 def version() -> None:
     """Print the AeroDoc version."""
     from aerodoc import __version__

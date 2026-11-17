@@ -16,4 +16,7 @@ lint:
 data:
 	uv run aerodoc data
 
-.PHONY: db db-down data test lint
+index:
+	uv run aerodoc index
+
+.PHONY: db db-down data index test lint
