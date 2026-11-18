@@ -32,24 +32,24 @@ Held-out test set (28 questions, used once, after every design choice was frozen
 ```mermaid
 flowchart LR
     subgraph Indexing["Indexing (once)"]
-        FR[Federal Register API<br/>+ govinfo.gov] --> C[Section- and page-aware<br/>chunking + context header]
-        HB[FAA handbook PDF] --> C
-        C --> E[bge-small embeddings]
-        E --> PG[(PostgreSQL + pgvector<br/>5,295 chunks)]
+        FR["Federal Register API<br/>+ govinfo.gov"] --> C["Section- and page-aware<br/>chunking + context header"]
+        HB["FAA handbook PDF"] --> C
+        C --> E["bge-small embeddings"]
+        E --> PG[("PostgreSQL + pgvector<br/>5,295 chunks")]
     end
     subgraph Query["Each question"]
-        Q[Question] --> T{French?}
-        T -- yes --> TR[LLM translation<br/>for retrieval]
-        T -- no --> D
-        TR --> D[Dense search<br/>top 30]
-        TR --> B[BM25 search<br/>top 30]
-        Q --> B
-        D --> F[Reciprocal Rank Fusion]
+        Q["Question"] --> T{"French?"}
+        T -- "yes" --> TR["LLM translation<br/>for retrieval"]
+        T -- "no" --> D
+        T -- "no" --> B
+        TR --> D["Dense search<br/>top 30"]
+        TR --> B["BM25 search<br/>top 30"]
+        D --> F["Reciprocal Rank Fusion"]
         B --> F
-        F --> R[Cross-encoder reranker<br/>top 20 → 5]
-        M[AD number named in the question<br/>→ its chunks kept] --> R
-        R --> L[Gemini: answer only from the<br/>5 passages, cite them, or abstain]
-        L --> A[Cited answer<br/>or "I don't know"]
+        F --> R["Cross-encoder reranker<br/>top 20 to 5"]
+        M["AD number named in the question:<br/>its chunks are kept"] --> R
+        R --> L["Gemini: answer only from the<br/>5 passages, cite them, or abstain"]
+        L --> A["Cited answer<br/>or #quot;I don't know#quot;"]
     end
     PG --> D
     PG --> B
