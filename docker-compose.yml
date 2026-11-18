@@ -1,9 +1,11 @@
+# `docker compose up` starts everything. First start: the API downloads the corpus and
+# builds the index (~10 min), then the interface is ready at http://localhost:8501.
 services:
   db:
     image: pgvector/pgvector:pg17
     environment:
       POSTGRES_USER: aerodoc
-      POSTGRES_PASSWORD: aerodoc
+      POSTGRES_PASSWORD: aerodoc   # local development only
       POSTGRES_DB: aerodoc
     ports:
       - "5432:5432"
@@ -15,10 +17,44 @@ services:
       timeout: 3s
       retries: 30
 
-  # Web UI to browse the database: http://localhost:8080
-  # Login: system "PostgreSQL", server "db", user/password/database "aerodoc".
+  api:
+    build: .
+    image: aerodoc:latest
+    # Build the corpus and index if the database is empty, then serve the API.
+    command: sh -c "aerodoc bootstrap && uvicorn aerodoc.api:app --host 0.0.0.0 --port 8000"
+    env_file:
+      - path: .env          # GEMINI_API_KEY
+        required: false
+    environment:
+      DATABASE_URL: postgresql://aerodoc:aerodoc@db:5432/aerodoc
+    volumes:
+      - corpus:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20m   # first start includes downloading and indexing
+
+  ui:
+    image: aerodoc:latest
+    command: streamlit run src/aerodoc/ui.py --server.port 8501 --server.address 0.0.0.0
+    environment:
+      AERODOC_API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+
+  # Optional database browser: docker compose --profile tools up adminer
   adminer:
     image: adminer:latest
+    profiles: ["tools"]
     # Listen on IPv4 explicitly: the image default ([::]) fails where IPv6 is disabled.
     command: ["php", "-S", "0.0.0.0:8080", "-t", "/var/www/html"]
     ports:
@@ -31,3 +67,4 @@ services:
 
 volumes:
   pgdata:
+  corpus:

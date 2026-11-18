@@ -390,3 +390,34 @@ Sur dev, une question citait l'AD 2026-09-14. BM25 trouvait ses passages aux pla
 - 1 question à deux étapes (consigne remplacée, elle-même remplacée) non résolue.
 
 Les questions de comptage (« combien de consignes ATR 72 ? ») et de liste complète restent hors de portée d'un RAG qui lit 5 passages : il faudrait interroger directement la base (piste : extraction structurée des consignes, en bonus).
+
+---
+
+## Étape 7 — API, interface et Docker
+
+### Ce qui a été construit
+```
+ navigateur ──► interface Streamlit (port 8501) ──► API FastAPI (port 8000) ──► PostgreSQL + pgvector
+                 question, réponse, sources          /ask /search /health        (5 295 passages)
+                                                      modèles chargés une fois
+                                                      ──► Gemini (réponse)
+```
+- **L'API** (`src/aerodoc/api.py`) : un petit serveur web qui reçoit une question (`POST /ask`) et renvoie la réponse, les passages, les citations et les temps de calcul, au format JSON. Les modèles (embedding, reranker, index BM25) sont chargés **une seule fois** au démarrage : chaque question ne paie plus que la recherche et le LLM. Documentation automatique sur http://localhost:8000/docs.
+- **L'interface** (`src/aerodoc/ui.py`) : une page web où l'on tape sa question ; la réponse s'affiche avec ses citations en gras, et chaque source se déplie pour montrer le passage exact et un lien vers le document original. Un dernier volet montre tous les passages retrouvés et la méthode qui les a trouvés.
+- **Docker** : `docker compose up` lance la base, l'API et l'interface. Au premier lancement, l'API télécharge les documents et construit l'index (`aerodoc bootstrap`, ~10 min) ; ensuite, le démarrage prend quelques secondes.
+
+### API, c'est quoi concrètement ?
+Une **API web** est un programme qui attend des requêtes sur une adresse (ici `http://localhost:8000/ask`) et répond en JSON. Avantage : l'interface Streamlit n'est qu'un client parmi d'autres. Un autre site, une application mobile ou un script pourraient utiliser AeroDoc de la même façon, sans toucher au moteur.
+
+### Choix et raisons (détails dans `docs/CHOIX.md`, section 9)
+| Choix | Pourquoi |
+|---|---|
+| **FastAPI** | Standard Python pour les API : validation automatique des requêtes (une question vide est refusée), documentation générée automatiquement. |
+| **Streamlit** | Une interface web complète en une centaine de lignes de Python, sans HTML ni JavaScript. |
+| **Interface séparée de l'API** | Le moteur peut servir d'autres clients ; on peut faire évoluer l'un sans casser l'autre. |
+| **Modèles intégrés à l'image Docker** | Pas de téléchargement au démarrage, fonctionne hors connexion (sauf l'appel à Gemini). |
+| **Index construit au premier lancement** | Les documents ne sont pas dans le dépôt (règle du projet) ; un recruteur n'a qu'une commande à taper. |
+| **PyTorch CPU** | Image de 3,4 Go au lieu de plus de 6 ; pas besoin de carte graphique. |
+
+### Tester chez toi
+Voir le `README.md` : installer Docker Desktop, cloner le dépôt, copier `.env.example` en `.env` et y coller sa clé Gemini, puis `docker compose up --build`, et ouvrir http://localhost:8501.

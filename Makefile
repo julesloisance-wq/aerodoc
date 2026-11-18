@@ -1,6 +1,6 @@
 db:
 	./scripts/ensure-docker.sh
-	docker compose up -d --wait db adminer
+	docker compose up -d --wait db
 	uv run aerodoc health
 
 db-down:
@@ -23,4 +23,14 @@ index:
 eval:
 	uv run aerodoc eval --config $(or $(CONFIG),configs/default.yaml) --questions $(or $(QUESTIONS),eval/questions/dev.jsonl)
 
-.PHONY: db db-down data index eval test lint
+up:
+	./scripts/ensure-docker.sh
+	docker compose up --build
+
+api:
+	uv run uvicorn aerodoc.api:app --port 8000
+
+ui:
+	uv run streamlit run src/aerodoc/ui.py --server.port 8501
+
+.PHONY: db db-down data index eval test lint up api ui

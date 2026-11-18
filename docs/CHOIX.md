@@ -325,6 +325,25 @@ Environ 1 200 à 2 200 tokens en entrée : assez pour couvrir une réponse qui d
 
 ---
 
+## 9. API, interface et déploiement
+
+### 9.1 FastAPI pour l'API
+**Pourquoi.** C'est le standard Python pour exposer un service : il valide automatiquement les requêtes (une question vide est refusée avec une erreur claire), produit une documentation interactive (`/docs`) et gère proprement le chargement des modèles au démarrage. Les modèles ne sont chargés qu'**une fois**, pas à chaque question.
+
+**En entretien.** « Le moteur est exposé par une API FastAPI ; les modèles sont chargés au démarrage du serveur, donc une question ne coûte que la recherche et l'appel au LLM, environ 2 secondes. »
+
+### 9.2 Streamlit pour l'interface, séparée de l'API
+**Pourquoi.** Streamlit permet une interface web en Python pur, en une centaine de lignes. L'interface n'appelle que l'API, comme n'importe quel autre client : on pourrait la remplacer par un site React ou un plugin dans un outil de maintenance sans toucher au moteur.
+
+**Les limites.** Streamlit convient à une démo ou un outil interne, pas à une application grand public.
+
+### 9.3 Une image Docker avec les modèles intégrés, l'index construit au premier lancement
+- **Les modèles (embedding et reranker) sont intégrés à l'image** : pas de téléchargement au démarrage, et la recherche fonctionne hors connexion.
+- **Les documents et l'index ne sont pas dans l'image** : ils sont téléchargés et construits au premier lancement (`aerodoc bootstrap`, environ 10 minutes), puis conservés dans des volumes Docker. Ça respecte la règle « aucun document dans le dépôt » tout en gardant une seule commande pour tout lancer.
+- **PyTorch en version CPU** : image d'environ 3,4 Go, contre plus de 6 Go avec le support des cartes graphiques.
+
+**En entretien.** « `docker compose up` lance la base, l'API et l'interface ; au premier lancement, le corpus est reconstruit depuis les sources publiques, ce qui garantit qu'aucun document n'est versionné et que l'index est reproductible. »
+
 ## 8. Méthode de travail
 
 ### 8.1 Une évaluation légère plutôt qu'un protocole de recherche

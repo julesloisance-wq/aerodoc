@@ -181,6 +181,27 @@ def format_summary(s: dict) -> str:
 
 
 @app.command()
+def bootstrap(
+    config: Path = typer.Option(Path("configs/default.yaml"), help="Pipeline config."),
+) -> None:
+    """Build the corpus and the index if the database is empty (first start in Docker)."""
+    from aerodoc.corpus import build_corpus
+    from aerodoc.index import build_index
+    from aerodoc.pipeline_config import load_config
+
+    with db.connect() as conn:
+        exists = conn.execute("SELECT to_regclass('chunks') IS NOT NULL").fetchone()[0]
+        n = conn.execute("SELECT count(*) FROM chunks").fetchone()[0] if exists else 0
+        if n:
+            typer.echo(f"Index already built ({n} chunks): nothing to do.")
+            return
+        typer.echo("First start: downloading the corpus and building the index (~10 min).")
+        build_corpus(Path("configs/corpus.yaml"), Path("data"))
+        n = build_index(conn, load_config(config), Path("data"))
+    typer.echo(f"Indexed {n} chunks.")
+
+
+@app.command()
 def version() -> None:
     """Print the AeroDoc version."""
     from aerodoc import __version__
