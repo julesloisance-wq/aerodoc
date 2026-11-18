@@ -1,26 +1,44 @@
 # Comprendre AeroDoc
 
-Ce document explique le système à Jules, étape par étape, sans supposer de connaissances préalables. Il grandit à chaque étape du plan.
+Ce document explique le système à Jules, étape par étape, sans supposer de connaissances préalables.
 
-**La justification détaillée de chaque choix (options, raisons, limites, formulation pour l'entretien) est dans [`docs/CHOIX.md`](CHOIX.md).**
+**La justification détaillée de chaque choix (options, raisons, limites, formulation pour l'entretien) est dans [`docs/CHOIX.md`](CHOIX.md). Le pitch de 3 minutes et les réponses aux questions d'entretien sont dans [`docs/PRESENTATION.md`](PRESENTATION.md).**
 
 ---
 
 ## Le projet en une phrase
 AeroDoc répond à des questions sur la documentation de maintenance des avions (publiée par la FAA, l'autorité américaine de l'aviation civile) en **cherchant d'abord les bons passages** dans les documents, puis en demandant à un LLM de **répondre uniquement à partir de ces passages, en les citant**. C'est ce qu'on appelle un **RAG** (*Retrieval-Augmented Generation*, « génération augmentée par la recherche »).
 
-## Schéma du flux (cible)
+## Schéma du système final
 
 ```
-                    PRÉPARATION (une fois)
-  Documents FAA ──► découpage en passages ──► embeddings ──► PostgreSQL + pgvector
-  (PDF, textes)      (chunks)                 (vecteurs)      (texte + vecteurs + page, URL)
+                    PRÉPARATION (une fois : make data, make index, ou au premier docker compose up)
+  225 consignes FAA ─┐
+  (texte, govinfo)   ├─► découpage en passages ─► en-tête ─► embeddings ─► PostgreSQL + pgvector
+  manuel FAA (PDF) ──┘   (~250 mots, sections,     (AD,      (bge-small,    5 295 passages
+                          pages)                   avion,     384 nombres)  + métadonnées
+                                                   section)
 
-                    À CHAQUE QUESTION
-  Question ──► recherche des passages proches ──► LLM (Gemini) ──► réponse citée
-                (par le sens + par mots-clés)      « réponds avec ces    ou « je ne sais pas »
-                                                    passages seulement »
+                    À CHAQUE QUESTION (interface Streamlit ─► API FastAPI)
+  question ─► (en français ? traduction en anglais pour la recherche)
+           ├─► recherche par le sens (vecteurs) ── 30 meilleurs ─┐
+           └─► recherche par mots-clés (BM25) ──── 30 meilleurs ─┤
+                                                                 ▼
+                           fusion des deux classements (RRF) ─► 20 candidats
+                           + passages de la consigne citée par son numéro, s'il y en a une
+                                                                 ▼
+                           reranker (relit chaque paire question/passage) ─► 5 passages
+                                                                 ▼
+               Gemini : « réponds seulement avec ces passages, cite-les, sinon dis que tu ne sais pas »
+                                                                 ▼
+                       réponse citée [1][4] + sources cliquables, ou « je ne sais pas »
 ```
+
+## Le projet en 6 chiffres
+- **225** consignes et **1** manuel de 677 pages, découpés en **5 295** passages.
+- Sur le jeu de test (jamais utilisé pour régler le système) : **82 %** de réponses justes, contre 27 % pour Gemini seul.
+- **0 %** de réponses inventées aux questions sans réponse, contre 50 % pour Gemini seul.
+- **2 secondes** de temps de réponse médian.
 
 ---
 
