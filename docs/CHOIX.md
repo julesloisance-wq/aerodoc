@@ -11,6 +11,58 @@ Les termes techniques sont expliqués dans le glossaire de `docs/COMPRENDRE.md`.
 
 ---
 
+## Ce qui a été construit, et ce qui a été réutilisé
+
+Comme presque tout projet logiciel, AeroDoc **assemble des briques existantes** (bibliothèques open source, modèles pré-entraînés, services, algorithmes publiés) avec du **code écrit pour le projet** (environ 2 800 lignes, dont les tests), qui les relie et les adapte au problème. Savoir faire ce partage est important en entretien : on ne prétend pas avoir inventé un modèle ou une base de données, mais on peut expliquer précisément ce qu'on a conçu.
+
+**Analogie.** Construire une maison : on n'invente ni les briques, ni le ciment, ni la chaudière ; on choisit lesquels utiliser, on dessine le plan, et on les assemble. Ici, FastAPI ou PostgreSQL sont des matériaux ; l'architecture, la façon de découper les documents, la recherche hybride, le prompt et l'évaluation sont le plan et l'assemblage.
+
+### Réutilisé tel quel (créé par d'autres)
+
+| Brique | Ce que c'est | Qui l'a créée | Ce qu'elle fait pour nous |
+|---|---|---|---|
+| **Données** : consignes FAA, manuel FAA-H-8083-30B | Documents publics | FAA, gouvernement américain | Le corpus |
+| API du Federal Register, govinfo.gov | Services publics | Gouvernement américain | Chercher et télécharger les consignes |
+| **PostgreSQL** | Base de données | Communauté open source | Stocker texte, métadonnées, vecteurs |
+| **pgvector** | Extension de PostgreSQL | Open source (A. Kane) | Stocker les vecteurs, chercher les plus proches (index HNSW) |
+| **HNSW** | Algorithme de recherche de voisins | Malkov et Yashunin (2016), implémenté dans pgvector | Recherche rapide des vecteurs proches |
+| **`BAAI/bge-small-en-v1.5`** | Modèle d'embedding pré-entraîné | Beijing Academy of Artificial Intelligence | Transformer un texte en vecteur |
+| **`sentence-transformers`** | Bibliothèque Python | UKP Lab / Hugging Face | Faire tourner le modèle d'embedding et le reranker |
+| **`cross-encoder/ms-marco-MiniLM-L6-v2`** | Reranker pré-entraîné | Équipe sentence-transformers, entraîné sur MS MARCO (Microsoft) | Relire et reclasser les 20 meilleurs passages |
+| **PyTorch** | Bibliothèque de calcul pour l'IA | Meta | Moteur de calcul des modèles |
+| **BM25** | Formule de classement par mots-clés | Robertson et al. (années 1990) | Recherche par mots-clés |
+| **`bm25s`** | Bibliothèque Python | X. H. Lù | Implémentation rapide de BM25 |
+| **RRF** | Formule de fusion de classements | Cormack et al. (2009) | Fusionner recherche par le sens et par mots-clés |
+| **Gemini** (`gemini-3.1-flash-lite`) | LLM | Google | Rédiger la réponse, traduire, générer des questions |
+| **`openai`** (bibliothèque cliente) | Bibliothèque Python | OpenAI | Envoyer les requêtes au LLM (format compatible) |
+| **PyMuPDF** | Bibliothèque Python | Artifex | Lire le texte et la table des matières du PDF |
+| **FastAPI** + **Uvicorn** | Framework web + serveur | S. Ramírez / Encode | Exposer le moteur sous forme d'API |
+| **Streamlit** | Framework d'interface web | Snowflake | Créer la page web en Python |
+| **Docker**, **docker compose** | Outils de conteneurs | Docker Inc. | Lancer le projet à l'identique partout |
+| **`uv`**, `pydantic`, `typer`, `httpx`, `pytest`, `ruff` | Outils Python | Divers | Dépendances, validation, ligne de commande, HTTP, tests, style |
+| **Intervalle de Wilson** | Formule statistique | E. B. Wilson (1927) | Marges d'erreur des scores |
+| **Adminer** | Interface web pour bases de données | Open source | Explorer la base (optionnel) |
+
+**Aucun modèle n'a été entraîné ni modifié** : tous sont utilisés tels quels (voir « Et le fine-tuning ? »).
+
+### Construit pour le projet (code écrit avec Claude Code, conçu et validé par Jules)
+
+| Partie | Fichiers | Ce qui est propre au projet |
+|---|---|---|
+| Constitution du corpus | `corpus.py`, `configs/corpus.yaml` | Choix des familles d'avions et de la période, filtre sur le résumé, contournement du texte protégé (govinfo), manifeste avec empreintes |
+| Découpage | `chunking.py` | Découpage qui suit les sections (a)-(k) et les pages des consignes, table des matières du manuel, en-tête contextuel, sections administratives écartées |
+| Indexation | `index.py`, `db.py` | Schéma de la base, index vectoriel et plein texte |
+| Recherche | `search.py` | Assemblage dense + BM25 + RRF + reranker, découpage en mots adapté aux identifiants (« A321-271NX »), filtre par numéro de consigne |
+| Réponse | `answer.py`, `llm.py` | Prompt (citations, abstention), détection de l'abstention, traduction des questions en français, bascule entre modèles |
+| Évaluation | `evaluate.py`, `probe.py`, `scripts/`, `eval/questions/` | Les 3 jeux de questions, la génération et le filtrage automatique, les métriques, les points de comparaison, l'analyse des erreurs |
+| API | `api.py` | Les 4 points d'entrée (`/ask`, `/search`, `/health`, `/stats`) et le format des réponses |
+| Interface | `ui.py` | La page : question, réponse citée, sources dépliables, passages retrouvés |
+| Déploiement | `Dockerfile`, `docker-compose.yml`, `aerodoc bootstrap` | Image avec modèles intégrés, construction de l'index au premier lancement |
+
+**En entretien.** « Je n'ai entraîné aucun modèle : j'utilise un modèle d'embedding et un reranker open source, et Gemini pour la génération. Mon travail porte sur la conception du système autour : comment découper des documents réglementaires, comment combiner recherche sémantique, recherche par mots-clés et métadonnées, comment forcer le LLM à citer et à s'abstenir, et surtout comment mesurer que ça marche. »
+
+---
+
 ## Vue d'ensemble : pourquoi un RAG ?
 
 **Le problème.** On veut un assistant qui répond à des questions sur des documents de maintenance aéronautique, sans inventer.
