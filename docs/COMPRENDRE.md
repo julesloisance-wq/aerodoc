@@ -376,7 +376,7 @@ Le premier test (20 questions écrites en lisant les documents) prouvait que le 
 **Comment le lire.**
 - **Gemini seul invente** : à « Quel logiciel les compagnies utilisent-elles pour suivre les consignes ? », il donne une liste de produits ; à une consigne qui n'existe pas (AD 2023-12-12), il décrit son contenu avec assurance. Il refuse aussi les consignes de 2026, car ses connaissances s'arrêtent à la date de son entraînement.
 - **Le RAG simple n'invente plus** (0 réponse inventée), mais il dit trop souvent « je ne sais pas » (41 %) : sa recherche rate les numéros de consigne.
-- **Le RAG final** combine les deux qualités : il ne s'invente rien et trouve le bon passage 9 fois sur 10.
+- **Le RAG final** combine les deux qualités : il n'invente rien et trouve le bon passage 9 fois sur 10.
 
 **L'intervalle de confiance.** 82 % sur 22 questions veut dire « entre 62 % et 93 % avec une confiance de 95 % ». L'écart avec Gemini seul (27 %, entre 13 % et 48 %) est net : les intervalles ne se chevauchent pas. L'écart avec le RAG simple (50 %) est probable mais moins certain.
 
