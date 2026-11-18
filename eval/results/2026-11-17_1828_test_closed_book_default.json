@@ -1,0 +1,615 @@
+{
+  "date": "2026-11-17T18:28:31",
+  "questions_file": "eval/questions/test.jsonl",
+  "system": "closed_book",
+  "config": "configs/default.yaml",
+  "config_values": {
+    "embedding": {
+      "model": "BAAI/bge-small-en-v1.5",
+      "dimension": 384,
+      "query_prefix": "Represent this sentence for searching relevant passages: ",
+      "batch_size": 32
+    },
+    "chunking": {
+      "max_words": 250,
+      "overlap_words": 40,
+      "min_words": 80,
+      "skip_sections": [
+        "Agency",
+        "Action",
+        "Addresses",
+        "For Further Information Contact",
+        "Comments Invited",
+        "Confidential Business Information",
+        "Regulatory Flexibility Act",
+        "Paperwork Reduction Act",
+        "Authority for This Rulemaking",
+        "Regulatory Findings",
+        "List of Subjects in 14 CFR Part 39"
+      ]
+    },
+    "retrieval": {
+      "top_k": 5,
+      "mode": "hybrid",
+      "candidates": 30,
+      "rrf_k": 60,
+      "rerank": true,
+      "rerank_top_n": 20,
+      "reranker_model": "cross-encoder/ms-marco-MiniLM-L6-v2",
+      "ad_number_slots": 3
+    },
+    "llm": {
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash"
+      ],
+      "temperature": 0.0,
+      "max_tokens": 1024,
+      "timeout_s": 60.0,
+      "retries": 2
+    }
+  },
+  "summary": {
+    "questions": 28,
+    "retrieval_hit@5": null,
+    "answer_correct": {
+      "k": 6,
+      "n": 22,
+      "rate": 0.2727272727272727,
+      "ci95": [
+        0.132,
+        0.482
+      ]
+    },
+    "false_abstention": {
+      "k": 3,
+      "n": 22,
+      "rate": 0.13636363636363635,
+      "ci95": [
+        0.047,
+        0.333
+      ]
+    },
+    "correct_abstention": {
+      "k": 3,
+      "n": 6,
+      "rate": 0.5,
+      "ci95": [
+        0.188,
+        0.812
+      ]
+    },
+    "hallucination_on_unanswerable": {
+      "k": 3,
+      "n": 6,
+      "rate": 0.5,
+      "ci95": [
+        0.188,
+        0.812
+      ]
+    },
+    "citation_precision": null,
+    "median_latency_s": 1.335,
+    "max_latency_s": 11.88,
+    "mean_tokens": 164.10714285714286,
+    "answer_correct_by_type": {
+      "ad_number": {
+        "k": 0,
+        "n": 5,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.434
+        ]
+      },
+      "ad_topic": {
+        "k": 0,
+        "n": 4,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.49
+        ]
+      },
+      "french": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.793
+        ]
+      },
+      "handbook": {
+        "k": 6,
+        "n": 9,
+        "rate": 0.6666666666666666,
+        "ci95": [
+          0.354,
+          0.879
+        ]
+      },
+      "multi_doc": {
+        "k": 0,
+        "n": 2,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.658
+        ]
+      },
+      "superseded": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.793
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "g11",
+      "type": "ad_number",
+      "question": "What specific maintenance task is mandated by AD 2022-06-06 for the rudder pedal systems on the affected Boeing 737 fleet?",
+      "answer": "AD 2022-06-06 mandates a detailed inspection of the rudder pedal adjustment mechanism for the presence of foreign object debris (FOD) and a functional test of the rudder pedal adjustment system to ensure proper operation.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.26,
+      "tokens": 156,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "shroud"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g15",
+      "type": "ad_number",
+      "question": "What specific operational issue prompted the issuance of AD 2023-13-03 regarding the external door handle assembly?",
+      "answer": "AD 2023-13-03 was issued due to the potential for the external door handle assembly to become detached from the aircraft, which could result in the door opening during flight or the handle striking the fuselage or engine.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.22,
+      "tokens": 150,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "stuck"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g01",
+      "type": "ad_number",
+      "question": "What is the primary safety concern that necessitated the issuance of AD 2025-17-07?",
+      "answer": "The primary safety concern necessitating AD 2025-17-07 is the potential for an uncommanded engine shutdown or loss of engine thrust control due to a failure of the high-pressure turbine (HPT) stage 1 disk.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.98,
+      "tokens": 150,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "fatigue",
+        "corrosion"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g09",
+      "type": "ad_number",
+      "question": "What is the primary objective for technicians following the requirements of AD 2023-12-03?",
+      "answer": "The primary objective of AD 2023-12-03 is to detect and address potential cracking in the affected engine mount assemblies to prevent structural failure.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 3.4,
+      "tokens": 132,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "airworthiness limitation"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g31",
+      "type": "ad_number",
+      "question": "What is the total labor expenditure for the replacement procedure mandated by AD 2021-25-05?",
+      "answer": "The total labor expenditure mandated by AD 2021-25-05 is estimated at 1 work-hour per aircraft.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 10.94,
+      "tokens": 128,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "304"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g14",
+      "type": "ad_topic",
+      "question": "What specific structural failure on B737 primary exhaust nozzles necessitates corrective action to prevent potential fuselage or stabilizer impact during a fan blade-out incident?",
+      "answer": "The structural failure involves the cracking or detachment of the **primary exhaust nozzle** (specifically the aft nozzle assembly) due to fatigue or corrosion, which can lead to the nozzle separating from the engine during a fan blade-out event. This separation poses a risk of the nozzle striking the fuselage or horizontal stabilizer, potentially causing catastrophic structural damage.\n\nRelevant guidance is often addressed in **FAA Airworthiness Directives (ADs)** related to specific engine/pylon configurations, such as those requiring repetitive inspections of the nozzle attachment hardware and structural integrity of the nozzle skin and stiffeners.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 9.12,
+      "tokens": 219,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "strengthen"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g04",
+      "type": "ad_topic",
+      "question": "For B737 operations impacted by 5G C-Band interference, which specific runway surface condition codes are restricted for takeoff or landing?",
+      "answer": "For B737 operations impacted by 5G C-Band interference, the restrictions are not based on specific runway surface condition codes, but rather on the availability of radio altimeter-dependent systems.\n\nPer FAA Airworthiness Directive (AD) 2021-23-12 and subsequent revisions, operators are prohibited from performing certain operations—such as autoland, HUD to touchdown, or EVS to touchdown—at airports where 5G C-Band interference is present, regardless of the runway surface condition. You must consult the current \"Listing of 5G C-Band Interference Affected Airports\" and the specific limitations in your aircraft's Flight Manual Supplement (FMS) or Operations Specifications (OpSpecs) to determine if a specific runway or approach is restricted.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 3.92,
+      "tokens": 263,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "1 and 0|0 and 1|1 or 0|0 or 1|1 and 0|0 and 1"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g40",
+      "type": "ad_topic",
+      "question": "What is the underlying mechanical failure causing the ECAM alerts that necessitate swapping out flight control actuators on Airbus SAS Model A350-941 and -1041 aircraft?",
+      "answer": "The underlying mechanical failure involves the internal degradation of the actuator's **LVDT (Linear Variable Differential Transformer)**, specifically due to the ingress of hydraulic fluid into the electrical connector or internal short-circuiting caused by seal wear, which leads to erroneous position feedback and subsequent flight control system faults.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.6,
+      "tokens": 172,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "solder"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g02",
+      "type": "ad_topic",
+      "question": "What specific maintenance actions are required for the emergency breathing equipment installed on A350 aircraft to address the identified safety concerns?",
+      "answer": "Maintenance actions for A350 emergency breathing equipment (typically Protective Breathing Equipment or PBE) are governed by the manufacturer's Aircraft Maintenance Manual (AMM) and the specific Airworthiness Directive (AD) applicable to the installed unit's part number. Common requirements include periodic visual inspections for seal integrity, humidity indicator checks, and replacement upon reaching the manufacturer's specified shelf life or expiration date. Please consult the latest revision of the Airbus A350 AMM Chapter 35 and the relevant EASA/FAA ADs for your specific serial number to ensure compliance.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.1,
+      "tokens": 215,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "oxygen mask"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "h10",
+      "type": "french",
+      "question": "Quelle consigne a remplacé l'AD 2016-14-03 ?",
+      "answer": "La consigne de navigabilité (AD) 2016-14-03 a été remplacée par l'AD 2017-16-03.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.34,
+      "tokens": 135,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "2025-20-19"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g48",
+      "type": "handbook",
+      "question": "What is the proper concentration for preparing a Magnaglo fluorescent particle solution?",
+      "answer": "The proper concentration for a Magnaglo fluorescent particle solution is typically 0.1 to 0.4 milliliters per 100 milliliters of carrier fluid, as measured by a settling test in a graduated centrifuge tube. Always refer to the specific manufacturer's technical data sheet for the product being used, as concentrations can vary based on the specific particle type and application requirements.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.06,
+      "tokens": 165,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "0.10 to 0.25|0.1 to 0.25|0.10-0.25|0.1-0.25",
+        "gallon"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g54",
+      "type": "handbook",
+      "question": "What was the primary mechanical failure identified by the NTSB as the cause of the Alaska Airlines Flight 261 crash?",
+      "answer": "The primary mechanical failure identified by the NTSB was the catastrophic failure of the horizontal stabilizer trim system's jackscrew assembly, specifically due to excessive wear and the subsequent stripping of the acme nut threads.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.33,
+      "tokens": 142,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "lubrication"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g57",
+      "type": "handbook",
+      "question": "What are the three categories of Airworthiness Directives that the FAA may release?",
+      "answer": "The FAA issues Airworthiness Directives in the following three categories:\n\n1. **Notice of Proposed Rulemaking (NPRM)**\n2. **Final Rule**\n3. **Emergency Airworthiness Directive**",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.18,
+      "tokens": 133,
+      "cited": [],
+      "retrieved": null,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g49",
+      "type": "handbook",
+      "question": "When calculating complex algebraic expressions, what is the standard sequence for processing grouped terms?",
+      "answer": "In mathematics, the standard sequence for processing grouped terms is to evaluate expressions within parentheses, brackets, or braces first, following the order of operations (PEMDAS/BODMAS).",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.25,
+      "tokens": 126,
+      "cited": [],
+      "retrieved": null,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g44",
+      "type": "handbook",
+      "question": "What is the most effective way for a technician to address persistent tiredness?",
+      "answer": "The most effective way to address persistent tiredness is to prioritize consistent sleep hygiene, maintain a balanced diet, and utilize strategic napping or caffeine consumption while strictly adhering to your organization's Fatigue Risk Management System (FRMS). If fatigue persists, you must consult a medical professional to rule out underlying sleep disorders or health conditions that could compromise your ability to perform safety-sensitive maintenance tasks.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 0.77,
+      "tokens": 164,
+      "cited": [],
+      "retrieved": null,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g52",
+      "type": "handbook",
+      "question": "Which Phillips screwdriver sizes are appropriate for specific screw dimensions?",
+      "answer": "Phillips screwdriver sizes are matched to screw head sizes as follows:\n\n*   **#0:** Used for miniature screws (e.g., electronics, small instruments).\n*   **#1:** Used for small screws (e.g., #2 to #4 diameter).\n*   **#2:** The most common size in aviation, used for #5 to #10 diameter screws.\n*   **#3:** Used for larger screws (e.g., 1/4\" diameter and above).\n*   **#4:** Used for heavy-duty, large-diameter screws.\n\n**Important Note:** Always ensure the screwdriver tip fits snugly into the screw recess. Using an undersized driver will cause \"cam-out,\" which strips the screw head and makes removal difficult. In aviation maintenance, ensure you are using the correct tool to prevent damage to airframe components.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.91,
+      "tokens": 267,
+      "cited": [],
+      "retrieved": null,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g62",
+      "type": "handbook",
+      "question": "Why is air considered an ineffective medium for transferring thermal energy through direct contact?",
+      "answer": "Air is an ineffective medium for transferring thermal energy through direct contact because it is a gas with low molecular density and low thermal conductivity, making it an excellent insulator when trapped in a confined space.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.11,
+      "tokens": 127,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "farther apart|far apart|spaced"
+      ],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g58",
+      "type": "handbook",
+      "question": "What environmental conditions are considered optimal for the curing process of aircraft sealants?",
+      "answer": "The optimal environmental conditions for curing aircraft sealants (such as polysulfides) are typically a temperature of 77°F (25°C) and a relative humidity of 50%. Deviating from these conditions—specifically increasing temperature and humidity—will significantly accelerate the cure rate, while lower temperatures will retard it. Always consult the specific manufacturer's technical data sheet (TDS) for the sealant product, as requirements vary by chemical composition.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.73,
+      "tokens": 182,
+      "cited": [],
+      "retrieved": null,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "g51",
+      "type": "handbook",
+      "question": "What is the standard mathematical method for calculating the surface area of a four-sided shape that features only one set of parallel edges?",
+      "answer": "The standard mathematical method for calculating the area of a trapezoid (a quadrilateral with one pair of parallel sides) is to multiply the average of the lengths of the two parallel sides by the perpendicular height: Area = ((a + b) / 2) * h.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.34,
+      "tokens": 154,
+      "cited": [],
+      "retrieved": null,
+      "correct": true,
+      "missing_facts": [],
+      "citation_precision": null,
+      "false_abstention": false
+    },
+    {
+      "id": "h05",
+      "type": "multi_doc",
+      "question": "Which ATR 72 directives in the documents concern the landing gear?",
+      "answer": "I do not have access to a specific database of documents to list current Airworthiness Directives for the ATR 72.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 0.93,
+      "tokens": 120,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "2023-17-01",
+        "2025-04-04"
+      ],
+      "citation_precision": null,
+      "false_abstention": true
+    },
+    {
+      "id": "h04",
+      "type": "multi_doc",
+      "question": "AD 2026-04-05 was superseded. Which AD replaced it, and has that AD itself been replaced since?",
+      "answer": "There is no FAA Airworthiness Directive numbered 2026-04-05, as the year 2026 has not yet occurred.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 11.88,
+      "tokens": 143,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "2026-13-05",
+        "2026-14-11"
+      ],
+      "citation_precision": null,
+      "false_abstention": true
+    },
+    {
+      "id": "h03",
+      "type": "superseded",
+      "question": "Is AD 2025-13-12 still the latest AD on its subject, or has it been superseded?",
+      "answer": "There is no Airworthiness Directive numbered 2025-13-12 in the current FAA database.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.19,
+      "tokens": 132,
+      "cited": [],
+      "retrieved": null,
+      "correct": false,
+      "missing_facts": [
+        "2025-25-12"
+      ],
+      "citation_precision": null,
+      "false_abstention": true
+    },
+    {
+      "id": "u01",
+      "type": "unanswerable",
+      "question": "What is the list price of a new Airbus A350-900?",
+      "answer": "Airbus discontinued the publication of official list prices in 2019, and actual transaction prices are determined by confidential negotiations.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.17,
+      "tokens": 125,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u02",
+      "type": "unanswerable",
+      "question": "What does AD 2026-18-04 require?",
+      "answer": "There is no FAA Airworthiness Directive with the identifier 2026-18-04, as the current year is 2024.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.06,
+      "tokens": 130,
+      "cited": [],
+      "correct_abstention": true
+    },
+    {
+      "id": "u16",
+      "type": "unanswerable",
+      "question": "Which software do airlines use to track AD compliance for their A320 fleet?",
+      "answer": "Airlines typically use specialized Maintenance, Repair, and Overhaul (MRO) or Maintenance and Engineering (M&E) software to track Airworthiness Directive (AD) compliance for their A320 fleets. Common industry-standard platforms include:\n\n*   **AMOS** (by Swiss-AS)\n*   **TRAX** (by TRAX USA Corp)\n*   **Maintenix** (by IFS)\n*   **Rusada ENVISION**\n\nThese systems are configured to manage the technical records, due dates, and repetitive inspection requirements mandated by ADs issued by the FAA or EASA.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 2.01,
+      "tokens": 219,
+      "cited": [],
+      "correct_abstention": false
+    },
+    {
+      "id": "u04",
+      "type": "unanswerable",
+      "question": "What does AD 2023-12-12 require for Boeing 737 airplanes?",
+      "answer": "AD 2023-12-12 requires repetitive inspections of the horizontal stabilizer trim actuator (HSTA) attachment bolts for discrepancies, including corrosion, cracking, or missing/damaged parts, and replacement if necessary. It applies to certain Boeing 737-600, -700, -700C, -800, -900, and -900ER series airplanes.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 1.06,
+      "tokens": 187,
+      "cited": [],
+      "correct_abstention": false
+    },
+    {
+      "id": "u10",
+      "type": "unanswerable",
+      "question": "What is the recommended oil change interval for the CFM LEAP-1B engines of the Boeing 737-8?",
+      "answer": "The recommended oil change interval for the CFM LEAP-1B engine is not a fixed hourly limit; instead, it is determined by the engine's oil consumption rate and the condition of the oil as monitored through the engine's oil analysis program and maintenance manual (AMM) procedures. Operators should consult the CFM LEAP-1B Engine Maintenance Manual (EMM), specifically the \"Oil System\" and \"Maintenance Planning\" sections, for specific oil service and replenishment requirements.",
+      "abstained": false,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 0.97,
+      "tokens": 196,
+      "cited": [],
+      "correct_abstention": false
+    },
+    {
+      "id": "u12",
+      "type": "unanswerable",
+      "question": "Quel est le prix d'une inspection C-check sur un A320 ?",
+      "answer": "Le coût d'une visite C-check pour un Airbus A320 varie considérablement selon l'étendue des travaux, l'âge de l'appareil et le centre de maintenance choisi, se situant généralement entre 400 000 et 800 000 dollars.",
+      "abstained": true,
+      "model": "gemini-3.1-flash-lite",
+      "latency_s": 0.98,
+      "tokens": 163,
+      "cited": [],
+      "correct_abstention": true
+    }
+  ]
+}

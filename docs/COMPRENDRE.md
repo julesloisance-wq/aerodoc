@@ -350,3 +350,43 @@ Les citations « hors source attendue » sont en fait pertinentes : page voisine
 
 ### Pourquoi valider les questions avant de lancer le score
 Si on regarde d'abord les résultats, on est tenté de retirer ou d'assouplir les questions ratées, et le score ne veut plus rien dire. C'est le même principe que la séparation entraînement / test en apprentissage automatique : ne pas régler son système (ou son évaluation) sur les données qui servent à le juger.
+
+---
+
+## Le test sérieux : 73 questions, dev/test, points de comparaison
+
+### Pourquoi refaire un test
+Le premier test (20 questions écrites en lisant les documents) prouvait que le système fonctionne, mais pas à quel point : trop peu de questions, trop faciles, pas de cas difficiles, et aucun point de comparaison.
+
+### Ce qui a été construit
+1. **73 questions** : 47 générées par le LLM à partir de passages tirés au hasard (avec obligation de reformuler), filtrées automatiquement puis relues ; 26 écrites à la main, dont 16 sans réponse et des pièges (numéro de consigne presque identique à un vrai, consignes remplacées, questions sur plusieurs consignes, questions en français). Jules a validé un échantillon de 20 questions tirées au hasard, avant tout calcul.
+2. **Séparation dev / test (45 / 28)** : on analyse les erreurs et on corrige sur dev ; test n'est utilisé **qu'une fois**, à la fin.
+3. **Trois systèmes comparés** : Gemini seul (sans documents), un RAG simple (recherche par le sens seule), le RAG final.
+4. **Marges d'erreur** : chaque score a un intervalle de confiance à 95 %.
+
+### Le résultat final (jeu de test, utilisé une seule fois)
+| | Gemini seul | RAG simple | **RAG final** |
+|---|---|---|---|
+| Réponses justes | 27 % (6/22) | 50 % (11/22) | **82 % (18/22)** |
+| Réponses inventées aux questions sans réponse | 50 % (3/6) | 0 % | **0 %** |
+| Abstentions à tort | 14 % | 41 % | 14 % |
+| Bon passage dans les 5 | — | 73 % | **91 %** |
+| Citations vers la bonne source | — | 91 % | **98 %** |
+
+**Comment le lire.**
+- **Gemini seul invente** : à « Quel logiciel les compagnies utilisent-elles pour suivre les consignes ? », il donne une liste de produits ; à une consigne qui n'existe pas (AD 2023-12-12), il décrit son contenu avec assurance. Il refuse aussi les consignes de 2026, car ses connaissances s'arrêtent à la date de son entraînement.
+- **Le RAG simple n'invente plus** (0 réponse inventée), mais il dit trop souvent « je ne sais pas » (41 %) : sa recherche rate les numéros de consigne.
+- **Le RAG final** combine les deux qualités : il ne s'invente rien et trouve le bon passage 9 fois sur 10.
+
+**L'intervalle de confiance.** 82 % sur 22 questions veut dire « entre 62 % et 93 % avec une confiance de 95 % ». L'écart avec Gemini seul (27 %, entre 13 % et 48 %) est net : les intervalles ne se chevauchent pas. L'écart avec le RAG simple (50 %) est probable mais moins certain.
+
+### L'analyse des erreurs sur dev, et la correction
+Sur dev, une question citait l'AD 2026-09-14. BM25 trouvait ses passages aux places 1 à 5, mais le reranker les écartait au profit d'autres consignes au vocabulaire proche : il ignore les numéros exacts. Correction : si la question cite un numéro de consigne présent dans la base, 3 de ses passages sont gardés parmi les 5 (un filtre sur les **métadonnées**). Dev : questions par numéro 7/8 → 8/8. Une autre piste testée n'a rien donné et a été abandonnée. Les deux sont notées dans `EXPERIMENTS.md`.
+
+### Les échecs restants (test), relus à la main
+- 1 faux négatif de la vérification par mots-clés (réponse juste, formulée autrement) ;
+- 1 réponse partielle ;
+- 1 passage du manuel non retrouvé ;
+- 1 question à deux étapes (consigne remplacée, elle-même remplacée) non résolue.
+
+Les questions de comptage (« combien de consignes ATR 72 ? ») et de liste complète restent hors de portée d'un RAG qui lit 5 passages : il faudrait interroger directement la base (piste : extraction structurée des consignes, en bonus).

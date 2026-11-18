@@ -89,3 +89,50 @@ back-off); median 5.2 s.
 
 Caveats: 20 questions only (one question = 6 points on answerable metrics); key-fact matching is
 a coarse proxy for correctness; questions were written from the passages.
+
+
+## 2026-11-17 — 73-question benchmark: baselines, dev analysis, final test (briques 1-4)
+
+Question set: 47 LLM-generated questions (seeded random passages, automatic filters, manual
+curation: 19 dropped as ambiguous, key facts relaxed) + 26 hand-written (near-miss AD numbers,
+superseded ADs, multi-document, French, 16 unanswerable). Stratified seeded split:
+dev 45 / test 28. A random sample of 20 questions was reviewed and validated by Jules before
+any run. 95 % Wilson confidence intervals in brackets.
+
+Systems: **closed-book** (Gemini flash-lite without documents, may abstain), **dense-only RAG**
+(`configs/dense_only.yaml`), **final RAG** (`configs/default.yaml`).
+
+### Dev (45 questions: 35 answerable, 10 unanswerable)
+
+| | Closed-book | Dense-only RAG | Final RAG (before fix) | Final RAG (+ AD-number match) |
+|---|---|---|---|---|
+| Correct answers | 40 % (14/35) [26-56] | 60 % (21/35) [44-74] | 86 % (30/35) [71-94] | 89 % (31/35) [74-96] |
+| Made-up answers on unanswerable | 70 % (7/10) | 0 % (0/10) | 0 % (0/10) | 0 % (0/10) |
+| Wrong abstentions | 20 % (7/35) | 29 % (10/35) | 6 % (2/35) | 3 % (1/35) |
+| Relevant passage in top 5 | n/a | 71 % | 83 % | 86 % |
+
+Dev error analysis led to one change: when the question names an AD present in the corpus,
+3 of its chunks are kept among the top 5 (`ad_number_slots: 3`). The generic reranker ignored
+exact AD numbers (AD 2026-09-14 ranked 1-5 by BM25 but dropped after fusion/reranking).
+An alternative (interleaving dense and BM25 candidates for the reranker) did not fix it and
+was discarded. Remaining dev failures: 1 partial answer (part number missing), 1 key-fact
+false negative, 1 chunking issue (list on the other half of the page), 1 counting question.
+
+### Test (28 questions: 22 answerable, 6 unanswerable) — run once, after all choices were fixed
+
+| | Closed-book | Dense-only RAG | **Final RAG** |
+|---|---|---|---|
+| Correct answers | 27 % (6/22) [13-48] | 50 % (11/22) [31-69] | **82 % (18/22) [62-93]** |
+| Made-up answers on unanswerable | 50 % (3/6) [19-81] | 0 % (0/6) [0-39] | **0 % (0/6) [0-39]** |
+| Wrong abstentions | 14 % (3/22) | 41 % (9/22) | 14 % (3/22) |
+| Relevant passage in top 5 | n/a | 73 % (16/22) | **91 % (20/22)** |
+| Citation precision | n/a | 91 % | **98 %** |
+| Median latency | 1.3 s | 1.4 s | 2.1 s |
+
+Final RAG test failures, read manually: g15 key-fact false negative (answer correct, wording
+differs); g40 partial (right cause, but flagged an inconsistency and abstained); g57 retrieval
+miss (handbook page on AD categories); h04 two-step superseded chain not resolved.
+
+Closed-book failures include confident made-up answers on unanswerable questions (e.g. a
+software list for AD tracking, a non-existent AD 2023-12-12 described in detail) and refusals
+on 2026 ADs ("the year 2026 has not yet occurred"): its knowledge is frozen at training time.
