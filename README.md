@@ -139,6 +139,10 @@ docs/             COMPRENDRE.md (how it works), CHOIX.md (why), EXEMPLES.md
 
 All documents are works of the U.S. Government (Federal Register, govinfo.gov, FAA), not subject to copyright in the United States. Sources are listed in [`DATA_LICENSES.md`](DATA_LICENSES.md).
 
+## Licence
+
+Code: [MIT](LICENSE). Documents: see above (not distributed with the code).
+
 ## How this project was built
 
 The code was written with an AI coding assistant (Claude Code). Jules Loisance designed the system and its priorities, made the technical choices from the measurements, defined and validated the evaluation protocol and questions, and analysed the results. The reasoning behind each decision is in [`docs/CHOIX.md`](docs/CHOIX.md).

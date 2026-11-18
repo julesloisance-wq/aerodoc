@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Retrieval-augmented assistant over FAA airworthiness directives and maintenance handbooks, with cited answers."
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = [
     "bm25s>=0.3.16",
     "fastapi>=0.163.2",
