@@ -25,9 +25,17 @@ st.set_page_config(page_title="AeroDoc", page_icon="✈️", layout="wide")
 
 
 @st.cache_data(ttl=300)
+def _fetch_stats() -> dict:
+    # Raises on failure: Streamlit does not cache exceptions, so a failed check made while
+    # the API is still indexing is retried on the next page load instead of being kept.
+    response = httpx.get(f"{API_URL}/stats", timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
 def get_stats() -> dict | None:
     try:
-        return httpx.get(f"{API_URL}/stats", timeout=10).json()
+        return _fetch_stats()
     except httpx.HTTPError:
         return None
 
