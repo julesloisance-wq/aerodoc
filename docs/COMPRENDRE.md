@@ -42,6 +42,11 @@ AeroDoc répond à des questions sur la documentation de maintenance des avions 
 | **AD** (*Airworthiness Directive*, consigne de navigabilité) | Document officiel obligatoire : « sur tel avion, faites telle inspection sous tel délai ». |
 | **Federal Register** | Journal officiel américain, où sont publiées les AD ; il a une API gratuite. |
 | **Hugging Face** | Site qui héberge des modèles d'IA gratuits, dont nos modèles d'embedding. |
+| **API web** | Programme sans écran qui attend des questions sur une adresse (ici `http://localhost:8000/ask`) et renvoie des données brutes (JSON). C'est le « moteur » d'AeroDoc. |
+| **FastAPI** | Bibliothèque Python qui sert à écrire une API web ; elle vérifie les requêtes et génère une documentation automatique (`/docs`). |
+| **Streamlit** | Bibliothèque Python qui crée une page web interactive (cases, boutons, blocs dépliants) sans écrire de HTML, CSS ni JavaScript. C'est la « vitrine » d'AeroDoc. |
+| **Frontend / backend** | Le frontend est ce que voit l'utilisateur (l'interface Streamlit) ; le backend est le moteur qui fait le travail (l'API). Les séparer permet de changer l'un sans toucher à l'autre, et de servir plusieurs interfaces avec le même moteur. |
+| **JSON** | Format de texte standard pour échanger des données entre programmes, par exemple `{"answer": "...", "cited": [1, 4]}`. |
 
 ---
 
