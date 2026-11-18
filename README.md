@@ -4,7 +4,9 @@
 
 AeroDoc answers questions about 225 FAA airworthiness directives (Airbus A320 family, A350, Boeing 737, ATR 72; 2022–2026) and the 677-page FAA *Aviation Maintenance Technician Handbook – General*. Every statement in an answer is linked to the passage it comes from (directive, section, page), and the assistant abstains when the documents do not contain the answer.
 
-![AeroDoc interface: a cited answer with expandable sources](docs/img/interface.png)
+![AeroDoc demo: a cited answer, its sources, and an abstention on a directive that does not exist](docs/img/demo.gif)
+
+*30-second demo: a cited answer with expandable sources, then "I don't know" for a directive that is not in the corpus ([MP4 version](docs/img/demo.mp4)).*
 
 ## Why
 
