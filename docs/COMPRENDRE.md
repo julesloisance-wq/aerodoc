@@ -409,7 +409,7 @@ Les questions de comptage (« combien de consignes ATR 72 ? ») et de liste comp
 ### API, c'est quoi concrètement ?
 Une **API web** est un programme qui attend des requêtes sur une adresse (ici `http://localhost:8000/ask`) et répond en JSON. Avantage : l'interface Streamlit n'est qu'un client parmi d'autres. Un autre site, une application mobile ou un script pourraient utiliser AeroDoc de la même façon, sans toucher au moteur.
 
-### Choix et raisons (détails dans `docs/CHOIX.md`, section 9)
+### Choix et raisons (détails dans `docs/CHOIX.md`, section 8)
 | Choix | Pourquoi |
 |---|---|
 | **FastAPI** | Standard Python pour les API : validation automatique des requêtes (une question vide est refusée), documentation générée automatiquement. |

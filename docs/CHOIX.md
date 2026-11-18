@@ -325,28 +325,28 @@ Environ 1 200 à 2 200 tokens en entrée : assez pour couvrir une réponse qui d
 
 ---
 
-## 9. API, interface et déploiement
+## 8. API, interface et déploiement
 
-### 9.1 FastAPI pour l'API
+### 8.1 FastAPI pour l'API
 **Pourquoi.** C'est le standard Python pour exposer un service : il valide automatiquement les requêtes (une question vide est refusée avec une erreur claire), produit une documentation interactive (`/docs`) et gère proprement le chargement des modèles au démarrage. Les modèles ne sont chargés qu'**une fois**, pas à chaque question.
 
 **En entretien.** « Le moteur est exposé par une API FastAPI ; les modèles sont chargés au démarrage du serveur, donc une question ne coûte que la recherche et l'appel au LLM, environ 2 secondes. »
 
-### 9.2 Streamlit pour l'interface, séparée de l'API
+### 8.2 Streamlit pour l'interface, séparée de l'API
 **Pourquoi.** Streamlit permet une interface web en Python pur, en une centaine de lignes. L'interface n'appelle que l'API, comme n'importe quel autre client : on pourrait la remplacer par un site React ou un plugin dans un outil de maintenance sans toucher au moteur.
 
 **Les limites.** Streamlit convient à une démo ou un outil interne, pas à une application grand public.
 
-### 9.3 Une image Docker avec les modèles intégrés, l'index construit au premier lancement
+### 8.3 Une image Docker avec les modèles intégrés, l'index construit au premier lancement
 - **Les modèles (embedding et reranker) sont intégrés à l'image** : pas de téléchargement au démarrage, et la recherche fonctionne hors connexion.
 - **Les documents et l'index ne sont pas dans l'image** : ils sont téléchargés et construits au premier lancement (`aerodoc bootstrap`, environ 10 minutes), puis conservés dans des volumes Docker. Ça respecte la règle « aucun document dans le dépôt » tout en gardant une seule commande pour tout lancer.
 - **PyTorch en version CPU** : image d'environ 3,4 Go, contre plus de 6 Go avec le support des cartes graphiques.
 
 **En entretien.** « `docker compose up` lance la base, l'API et l'interface ; au premier lancement, le corpus est reconstruit depuis les sources publiques, ce qui garantit qu'aucun document n'est versionné et que l'index est reproductible. »
 
-## 8. Méthode de travail
+## 9. Méthode de travail
 
-### 8.1 Une évaluation légère plutôt qu'un protocole de recherche
+### 9.1 Une évaluation légère plutôt qu'un protocole de recherche
 **Le choix et pourquoi.** La priorité était un système qui marche et qu'on comprend, en deux jours. On mesure donc simplement :
 - une petite série de questions pour choisir la recherche (16 questions) ;
 - une vingtaine de questions pour le score final (étape 6).
@@ -355,7 +355,7 @@ C'est suffisant pour justifier les choix et donner un chiffre crédible.
 
 **Les limites.** Avec si peu de questions, les écarts de quelques points ne sont pas significatifs. En production, il faudrait des centaines de questions, idéalement posées par de vrais techniciens.
 
-### 8.2 Le test de qualité : 73 questions, dev/test, trois systèmes comparés
+### 9.2 Le test de qualité : 73 questions, dev/test, trois systèmes comparés
 **Le problème.** Prouver que le système marche, avec des chiffres qui résistent aux questions d'un recruteur.
 
 **La démarche, en deux temps.**
@@ -378,10 +378,10 @@ C'est suffisant pour justifier les choix et donner un chiffre crédible.
 
 **En entretien.** « J'ai construit 73 questions, dont 22 % sans réponse et des pièges, séparées en dev et test. J'ai comparé trois systèmes : le LLM seul invente sur la moitié des questions sans réponse et répond juste à 27 % ; mon RAG final répond juste à 82 %, avec un intervalle de confiance de 62 à 93 %, et n'invente jamais. L'analyse des erreurs sur dev m'a fait ajouter un filtre sur les numéros de consigne, et je n'ai lancé le test qu'une fois, à la fin. »
 
-### 8.3 Configuration versionnée, mesures notées
+### 9.3 Configuration versionnée, mesures notées
 Tous les paramètres sont dans `configs/default.yaml`, versionné dans Git. Chaque mesure est notée dans `EXPERIMENTS.md`. On peut donc toujours dire quelle configuration a produit quel résultat.
 
-### 8.4 Le rôle de l'IA dans le projet
+### 9.4 Le rôle de l'IA dans le projet
 Le code a été écrit par un assistant de code IA (Claude Code). Le rôle de Jules :
 - concevoir le système et définir les priorités (simplicité, rapidité, compréhension) ;
 - valider chaque choix technique à partir des mesures ;
