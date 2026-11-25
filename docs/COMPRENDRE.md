@@ -65,6 +65,8 @@ AeroDoc répond à des questions sur la documentation de maintenance des avions 
 | **Streamlit** | Bibliothèque Python qui crée une page web interactive (cases, boutons, blocs dépliants) sans écrire de HTML, CSS ni JavaScript. C'est la « vitrine » d'AeroDoc. |
 | **Frontend / backend** | Le frontend est ce que voit l'utilisateur (l'interface Streamlit) ; le backend est le moteur qui fait le travail (l'API). Les séparer permet de changer l'un sans toucher à l'autre, et de servir plusieurs interfaces avec le même moteur. |
 | **JSON** | Format de texte standard pour échanger des données entre programmes, par exemple `{"answer": "...", "cited": [1, 4]}`. |
+| **Recall@k** (ici recall@5) | Part des questions pour lesquelles le bon passage figure parmi les k premiers résultats de la recherche. Dit **si** le bon passage est envoyé au LLM. |
+| **MRR** (*Mean Reciprocal Rank*) | Moyenne, sur les questions, de 1 / (rang du premier bon passage) : 1 s'il est 1ᵉʳ, 0,5 s'il est 2ᵉ, 0 s'il est absent des 10 premiers. Dit **à quelle place** il arrive. Exemple : la recherche hybride avait 100 % de recall@5 mais un MRR de 0,85 ; le reranker l'a porté à 0,94 en remettant les bons passages en tête. |
 
 ---
 
