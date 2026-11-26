@@ -1,6 +1,6 @@
 # Présenter AeroDoc
 
-Ce document prépare Jules à présenter le projet en entretien : un pitch de 3 minutes, des lignes de CV, et des réponses courtes aux questions les plus probables. Les justifications complètes sont dans `CHOIX.md`, les explications dans `COMPRENDRE.md`.
+Ce document prépare Jules à présenter le projet en entretien : un pitch de 3 minutes, des lignes de CV, et des réponses courtes aux questions les plus probables. Les justifications complètes sont dans `CHOIX.md`, les explications dans `COMPRENDRE.md`. Pour lancer et réussir une démo en direct de l'interface : `DEMO.md`.
 
 À dire **avec ses propres mots** : ce sont des trames, pas un texte à réciter.
 

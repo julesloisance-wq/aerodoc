@@ -134,7 +134,7 @@ configs/          corpus definition and versioned pipeline configs
 eval/questions/   smoke (20), dev (45) and test (28) question sets, hand-written hard cases
 eval/results/     raw results of every benchmark run
 scripts/          question generation, curation and split; examples
-docs/             COMPRENDRE.md (how it works), CHOIX.md (why), EXEMPLES.md
+docs/             COMPRENDRE.md (how it works), CHOIX.md (why), EXEMPLES.md, DEMO.md (live demo guide)
 ```
 
 ## Data and licences
