@@ -446,3 +446,58 @@ Une **API web** est un programme qui attend des requêtes sur une adresse (ici `
 
 ### Tester chez toi
 Voir le `README.md` : installer Docker Desktop, cloner le dépôt, copier `.env.example` en `.env` et y coller sa clé Gemini, puis `docker compose up --build`, et ouvrir http://localhost:8501.
+
+---
+
+## Récapitulatif : toutes les architectures testées
+
+Toutes les mesures ci-dessous viennent de `EXPERIMENTS.md`. Une case vide (—) veut dire « non mesuré » ou « sans objet ».
+
+### Les architectures
+| Nom | Recherche par le sens | BM25 | Fusion RRF | Reranker | Filtre n° de consigne | LLM |
+|---|---|---|---|---|---|---|
+| **A. LLM seul** | — | — | — | — | — | Gemini, sans documents |
+| **B. Sens seul** (RAG simple) | ✅ | — | — | — | — | Gemini |
+| **C. BM25 seul** | — | ✅ | — | — | — | — |
+| **D. Hybride** | ✅ | ✅ | ✅ | — | — | — |
+| **E. Hybride + reranker MiniLM** | ✅ | ✅ | ✅ | ✅ MiniLM | — | Gemini |
+| **F. Hybride + gros reranker** | ✅ | ✅ | ✅ | ✅ bge-base | — | — |
+| **G. Final** | ✅ | ✅ | ✅ | ✅ MiniLM | ✅ | Gemini |
+
+### 1. Recherche seule (16 questions de test de la recherche, étape 4)
+Ces questions ont servi à **choisir** la recherche ; elles reprennent souvent les mots des documents, ce qui avantage BM25.
+
+| Architecture | Bon passage en 1ʳᵉ position | Bon passage dans les 5 (recall@5) | MRR | Questions par n° de consigne trouvées (top 5) | Temps de recherche |
+|---|---|---|---|---|---|
+| B. Sens seul | 75 % | 81 % | 0,78 | 1/4 | 20 ms |
+| C. BM25 seul | 88 % | 100 % | 0,92 | 4/4 | 1 ms |
+| D. Hybride | 75 % | 100 % | 0,85 | 4/4 | 17 ms |
+| **E. Hybride + reranker MiniLM** | **88 %** | **100 %** | **0,94** | 4/4 | **≈ 1 s** |
+| F. Hybride + gros reranker | 94 % | 100 % | 0,97 | 4/4 | ≈ 4,9 s |
+
+→ Choix : E (presque tout le gain du reranker, 5 fois plus rapide que F).
+
+### 2. Système complet, jeu dev (45 questions : 35 avec réponse, 10 sans)
+Sert à analyser les erreurs et à corriger.
+
+| Architecture | Bon passage dans les 5 | Réponses justes | Réponses inventées (questions sans réponse) | « Je ne sais pas » à tort | Citations vers la bonne source | Temps médian |
+|---|---|---|---|---|---|---|
+| A. LLM seul | — | 40 % | 70 % | 20 % | — | 1,4 s |
+| B. Sens seul | 71 % | 60 % | 0 % | 29 % | 76 % | 1,6 s |
+| E. Hybride + reranker | 83 % | 86 % | 0 % | 6 % | 77 % | 2,2 s |
+| **G. Final (+ filtre)** | **86 %** | **89 %** | **0 %** | **3 %** | 77 % | 2,3 s |
+
+→ L'analyse des erreurs de E a conduit au filtre sur les numéros de consigne (G).
+
+### 3. Système complet, jeu test (28 questions : 22 avec réponse, 6 sans) — lancé une seule fois
+| Architecture | Bon passage dans les 5 | Réponses justes [IC 95 %] | Réponses inventées | « Je ne sais pas » à tort | Citations vers la bonne source | Temps médian |
+|---|---|---|---|---|---|---|
+| A. LLM seul | — | 27 % [13-48] | 50 % | 14 % | — | 1,3 s |
+| B. Sens seul | 73 % | 50 % [31-69] | 0 % | 41 % | 91 % | 1,4 s |
+| **G. Final** | **91 %** | **82 % [62-93]** | **0 %** | **14 %** | **98 %** | 2,1 s |
+
+### Ce qu'il faut retenir
+- **Le RAG supprime les inventions** (A → B : de 50-70 % à 0 %), mais un RAG simple s'abstient trop souvent, parce que sa recherche rate les identifiants.
+- **BM25 + reranker** corrigent la recherche (B → E sur dev : 60 % → 86 % de réponses justes).
+- **Le filtre** règle un cas précis repéré par l'analyse des erreurs (E → G : +1 question sur dev).
+- **Non mesuré** : l'effet de BM25 seul dans le système complet (architecture « reranker + filtre, sans BM25 ») et celui du gros reranker sur les réponses. Ce sont les ablations à faire ensuite pour chiffrer la part de chaque brique.
