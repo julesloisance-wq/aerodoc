@@ -451,6 +451,30 @@ Voir le `README.md` : installer Docker Desktop, cloner le dépôt, copier `.env.
 
 ## Récapitulatif : toutes les architectures testées
 
+### En un seul tableau : architectures et résultats sur le test final (28 questions, lancé une seule fois)
+
+| | **A. LLM seul** | **B. RAG simple** | **G. AeroDoc final** |
+|---|---|---|---|
+| **Architecture** | | | |
+| Recherche par le sens (embeddings) | — | ✅ | ✅ |
+| Recherche par mots-clés (BM25) | — | — | ✅ |
+| Fusion des classements (RRF) | — | — | ✅ |
+| Reranker (MiniLM) | — | — | ✅ |
+| Filtre sur le n° de consigne | — | — | ✅ |
+| LLM (Gemini flash-lite) | ✅ sans documents | ✅ 5 passages | ✅ 5 passages |
+| **Recherche** (22 questions avec réponse) | | | |
+| Bon passage parmi les 5 (recall@5) | — | 73 % (16/22) | **91 % (20/22)** |
+| **Génération** | | | |
+| Réponses justes (22 questions avec réponse) | 27 % (6/22) [13-48] | 50 % (11/22) [31-69] | **82 % (18/22) [62-93]** |
+| Réponses inventées (6 questions sans réponse) | 50 % (3/6) | 0 % | **0 %** |
+| « Je ne sais pas » à tort | 14 % (3/22) | 41 % (9/22) | 14 % (3/22) |
+| Citations vers la bonne source | — | 91 % | **98 %** |
+| **Coût** | | | |
+| Temps de réponse médian | 1,3 s | 1,4 s | 2,1 s |
+| Tokens par question (moyenne) | ≈ 160 | ≈ 1 830 | ≈ 1 810 |
+
+Entre crochets : intervalle de confiance à 95 %. Le MRR et le « bon passage en 1ʳᵉ position » n'ont pas été calculés sur ce test (seulement sur les 16 questions de recherche, tableau 1 ci-dessous). Les architectures C, D, E et F n'ont pas été passées sur le test final.
+
 Toutes les mesures ci-dessous viennent de `EXPERIMENTS.md`. Une case vide (—) veut dire « non mesuré » ou « sans objet ».
 
 ### Les architectures
